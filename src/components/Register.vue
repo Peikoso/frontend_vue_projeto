@@ -105,7 +105,7 @@
     </div>
     
     <div class="register-footer">
-      <p>&copy; 2023 FinTrack - Todos os direitos reservados</p>
+      <p>&copy; 2025 FinTrack - Todos os direitos reservados</p>
     </div>
   </div>
 </template>
