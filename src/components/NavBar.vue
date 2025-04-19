@@ -30,6 +30,7 @@
     <router-link to="/relatorio" class="mobile-link" @click="closeMenu">RELATÓRIO</router-link>
     <router-link to="/receitas" class="mobile-link" @click="closeMenu">RECEITAS</router-link>
     <router-link to="/metas" class="mobile-link" @click="closeMenu">METAS</router-link>
+    <router-link to="/patrimonio" class="mobile-link" @click="closeMenu">PATRIMÔNIO</router-link>
     <router-link to="/" class="mobile-link landing-link" @click="closeMenu">INÍCIO</router-link>
     <router-link to="/perfil" class="mobile-link" @click="closeMenu">
       <span>PERFIL</span> 👤

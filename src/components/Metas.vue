@@ -482,8 +482,9 @@ export default {
     formatDate(dateString) {
       if (!dateString) return 'N/A';
       
+      const date = new Date(dateString + 'T00:00:00');
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-      return new Date(dateString).toLocaleDateString('pt-BR', options);
+      return date.toLocaleDateString('pt-BR', options);
     },
     
     formatCurrency(value) {

@@ -63,12 +63,12 @@ const routes = [
     component: Perfil,
     meta: { requiresAuth: true }
   },
-  { path: '/register', component: Register },
-  {
-    path: '/patrimonio',
+  { 
+    path: '/patrimonio', 
     component: Patrimonio,
     meta: { requiresAuth: true }
-  }
+  },
+  { path: '/register', component: Register }
 ]
 
 const router = createRouter({

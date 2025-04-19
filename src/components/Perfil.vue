@@ -124,7 +124,7 @@
                 <p v-if="emailError" class="error-text">{{ emailError }}</p>
               </div>
               <div class="form-group">
-                <label for="new_password">Nova Senha</label>
+                <label for="new_password">Senha ou Nova Senha</label>
                 <div class="password-input">
                   <input 
                     :type="showNewPassword ? 'text' : 'password'" 
@@ -145,7 +145,7 @@
               </div>
 
               <div class="form-group">
-                <label for="confirm_password">Confirme a Nova Senha</label>
+                <label for="confirm_password">Confirme a Senha</label>
                 <div class="password-input">
                   <input 
                     :type="showConfirmPassword ? 'text' : 'password'" 
