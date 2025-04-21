@@ -12,7 +12,7 @@
           <div class="card-icon">💰</div>
           <div class="card-content">
             <h3>Entrada mensal</h3>
-            <p class="amount">R$: 1.242,24</p>
+            <p class="amount">{{ formatCurrency(financialSummary.income) }}</p>
           </div>
         </div>
         
@@ -20,7 +20,7 @@
           <div class="card-icon">💸</div>
           <div class="card-content">
             <h3>Despesa mensal</h3>
-            <p class="amount">R$: 1.153,23</p>
+            <p class="amount">{{ formatCurrency(financialSummary.expense) }}</p>
           </div>
         </div>
         
@@ -28,7 +28,7 @@
           <div class="card-icon">⚠️</div>
           <div class="card-content">
             <h3>Situação financeira</h3>
-            <p class="status">Crítico</p>
+            <p class="status" :class="financialSummary.status.toLowerCase()">{{ financialSummary.status }}</p>
           </div>
         </div>
         
@@ -52,12 +52,12 @@
             <div class="header-icon">📝</div>
             <h3>Contas a pagar</h3>
           </div>
-          <p class="amount">R$: 748,54</p>
+          <p class="amount">{{ formatCurrency(billsToPay) }}</p>
           <div class="progress-container">
             <div class="progress-bar">
-              <div class="progress" style="width: 75%"></div>
+              <div class="progress" :style="{ width: (billsToPay / spendingLimit * 100) + '%' }"></div>
             </div>
-            <p class="progress-text">75% do limite</p>
+            <p class="progress-text">{{ Math.round(billsToPay / spendingLimit * 100) }}% do limite</p>
           </div>
         </div>
         
@@ -66,12 +66,12 @@
             <div class="header-icon">💵</div>
             <h3>Saldo disponível</h3>
           </div>
-          <p class="amount">R$: 89,01</p>
+          <p class="amount">{{ formatCurrency(financialSummary.balance) }}</p>
           <div class="progress-container">
             <div class="progress-bar">
-              <div class="progress success" style="width: 8%"></div>
+              <div class="progress success" :style="{ width: (financialSummary.balance > 0 ? (financialSummary.balance / financialSummary.income * 100) : 0) + '%' }"></div>
             </div>
-            <p class="progress-text">8% do total</p>
+            <p class="progress-text">{{ Math.round(financialSummary.balance > 0 ? (financialSummary.balance / financialSummary.income * 100) : 0) }}% do total</p>
           </div>
         </div>
       
@@ -88,12 +88,12 @@
             <div class="header-icon">🎯</div>
             <h3>Limite de gastos do mês</h3>
           </div>
-          <p class="amount">R$: 900</p>
+          <p class="amount">{{ formatCurrency(spendingLimit) }}</p>
           <div class="progress-container">
             <div class="progress-bar">
-              <div class="progress warning" style="width: 89%"></div>
+              <div class="progress warning" :style="{ width: spendingPercentage + '%' }"></div>
             </div>
-            <p class="progress-text">89% utilizado</p>
+            <p class="progress-text">{{ Math.round(spendingPercentage) }}% utilizado</p>
           </div>
         </div>
       </div>
@@ -103,16 +103,70 @@
 
 <script>
 import NavBar from './NavBar.vue';
+import { TransactionService } from '../services/TransactionService';
+import { computed, ref, onMounted } from 'vue';
 
 export default {
   name: 'Home',
   components: {
     NavBar
   },
-  data() {
+  setup() {
+    const currentDate = ref(new Date());
+    
+    // Obter transações do mês atual
+    const monthlyTransactions = TransactionService.getTransactionsByMonth(currentDate.value);
+    
+    // Calcular receitas e despesas
+    const financialSummary = computed(() => {
+      const transactions = monthlyTransactions.value;
+      const income = transactions
+        .filter(t => t.valor > 0)
+        .reduce((sum, t) => sum + t.valor, 0);
+      
+      const expense = transactions
+        .filter(t => t.valor < 0)
+        .reduce((sum, t) => sum + Math.abs(t.valor), 0);
+      
+      const balance = income - expense;
+      
+      // Determinar situação financeira
+      let status = 'Estável';
+      if (balance > income * 0.2) status = 'Ótimo';
+      else if (balance > 0) status = 'Bom';
+      else if (balance < 0) status = 'Crítico';
+      
+      return { income, expense, balance, status };
+    });
+    
+    // Calcular contas a pagar (simplificado)
+    const billsToPay = computed(() => {
+      return monthlyTransactions.value
+        .filter(t => t.valor < 0 && t.status === 'Pendente')
+        .reduce((sum, t) => sum + Math.abs(t.valor), 0);
+    });
+    
+    // Calcular limite de gastos (exemplo)
+    const spendingLimit = 900;
+    const spendingPercentage = computed(() => {
+      return Math.min(100, (financialSummary.value.expense / spendingLimit) * 100);
+    });
+    
+    // Formatar valores monetários
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    };
+    
     return {
-      // Data can be added here if needed
-    }
+      financialSummary,
+      billsToPay,
+      spendingLimit,
+      spendingPercentage,
+      formatCurrency
+    };
   }
 }
 </script>
