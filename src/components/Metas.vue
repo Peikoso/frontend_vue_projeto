@@ -207,7 +207,7 @@
           </div>
           
           <div class="modal-body">
-            <div class="details-category" :class="getCategoryClass(selectedMeta.categ)">
+            <div class="details-category">
               <span class="category-icon">{{ getCategoryIcon(selectedMeta.categ) }}</span>
               <span class="category-name">{{ getCategoryName(selectedMeta.categ) }}</span>
             </div>

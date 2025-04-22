@@ -8,7 +8,7 @@ import axios from 'axios'
 import Home from './components/Home.vue'
 import Login from './components/Login.vue'
 import Relatorio from './components/Relatorio.vue'
-import Receitas from './components/Receitas.vue'
+import Movimentacoes from './components/Movimentacoes.vue'
 import Metas from './components/Metas.vue'
 import Register from './components/Register.vue'
 import LandingPage from './components/LandingPage.vue'
@@ -49,8 +49,8 @@ const routes = [
     meta: { requiresAuth: true }
   },
   { 
-    path: '/receitas', 
-    component: Receitas,
+    path: '/movimentacoes', 
+    component: Movimentacoes,
     meta: { requiresAuth: true }
   },
   { 

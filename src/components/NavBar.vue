@@ -4,7 +4,7 @@
     <div class="nav-links">
       <router-link to="/home" class="nav-link">HOME</router-link>
       <router-link to="/relatorio" class="nav-link">RELATÓRIO</router-link>
-      <router-link to="/receitas" class="nav-link">RECEITAS</router-link>
+      <router-link to="/Movimentacoes" class="nav-link">MOVIMENTAÇÕES</router-link>
       <router-link to="/metas" class="nav-link">METAS</router-link>
       <router-link to="/patrimonio" class="nav-link">PATRIMÔNIO</router-link>
       <router-link to="/" class="nav-link landing-button">INÍCIO</router-link>
