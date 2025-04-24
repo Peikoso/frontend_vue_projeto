@@ -75,7 +75,7 @@
             <label for="filter-categoria">Categoria</label>
             <select id="filter-categoria" v-model="filters.categoria" class="filter-input">
               <option value="all">Todos</option>
-              <option v-for="categoria in availableCategories" :key="`categoria-${categoria}`" :value="categoria">{{ categoria }}</option>
+              <option v-for="categoria in availableCategories" :key="`categoria-${categoria}`" :value="categoria.value">{{ categoria.name }}</option>
             </select>
           </div>
           <button class="filter-button" @click="resetFiltersTipoMov">
@@ -392,8 +392,6 @@ export default {
         categoria: 'all'
       },
       availableYears: [],
-      availableCategories_receita: ['Salário', 'Rendimento', 'Presente', 'Venda', 'Reembolso', 'Outros'],
-      availableCategories_despesa: ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Investimentos', 'Outros']
     }
   },
   mounted() {
@@ -401,10 +399,12 @@ export default {
   },
   computed: {
     availableCategories() {
-      if (this.filters.tipo_mov === 'all') {
-        return [...this.availableCategories_receita, ...this.availableCategories_despesa];
+      if (this.filters.tipo_mov === 'receita') {
+        return Object.values(this.categoria_receita);
+      } else if (this.filters.tipo_mov === 'despesa') {
+        return Object.values(this.categoria_despesa);
       }
-      return this.filters.tipo_mov === 'receita' ? this.availableCategories_receita : this.availableCategories_despesa;
+      return [];
     },
     filteredMovimentacoes() {
       if (this.filters.month === 'all' && this.filters.year === 'all' && this.filters.categoria === 'all' && this.filters.tipo_mov === 'all') {
@@ -674,6 +674,12 @@ export default {
     }
 
   },
+  
+  watch: {
+    'filters.tipo_mov'(newVal) {
+      this.filters.categoria = 'all';
+    }
+  }
 
 }
 </script>

@@ -156,17 +156,17 @@
           <div class="contact-form">
             <div class="form-group">
               <label for="name">Nome</label>
-              <input type="text" id="name" placeholder="Seu nome completo">
+              <input type="text" id="name" v-model="formData.nome" placeholder="Seu nome completo">
             </div>
             <div class="form-group">
               <label for="email">Email</label>
-              <input type="email" id="email" placeholder="Seu email">
+              <input type="email" id="email" v-model="formData.email" placeholder="Seu email">
             </div>
             <div class="form-group">
               <label for="message">Mensagem</label>
-              <textarea id="message" rows="4" placeholder="Digite sua mensagem"></textarea>
+              <textarea id="message" rows="4" v-model="formData.menssagem" placeholder="Digite sua mensagem"></textarea>
             </div>
-            <button class="submit-button">Enviar mensagem</button>
+            <button class="submit-button" @click="enviarMensagem">Enviar mensagem</button>
           </div>
         </div>
       </div>
@@ -210,10 +210,17 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'LandingPage',
   data() {
     return {
+      formData: {
+        nome: '',
+        email: '',
+        menssagem: ''
+      },
       menuActive: false,
       currentSlide: 0,
       slides: [
@@ -237,6 +244,15 @@ export default {
     }
   },
   methods: {
+    async enviarMensagem() {
+      try{
+        await axios.post('/EnviarEmail/email', this.formData);
+        alert('Mensagem enviada com sucesso');
+      } catch (error) {
+        console.error('Error sending email:', error);
+        alert('Erro ao enviar mensagem. Por favor, tente novamente.');
+      }
+    },
     toggleMenu() {
       this.menuActive = !this.menuActive;
     },
@@ -401,7 +417,7 @@ export default {
 .mobile-menu {
   display: none;
   position: fixed;
-  top: 0;
+  top: 30px;
   left: 0;
   right: 0;
   background: white;

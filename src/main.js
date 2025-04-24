@@ -7,7 +7,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import axios from 'axios'
 import Home from './components/Home.vue'
 import Login from './components/Login.vue'
-import Relatorio from './components/Relatorio.vue'
 import Movimentacoes from './components/Movimentacoes.vue'
 import Metas from './components/Metas.vue'
 import Register from './components/Register.vue'
@@ -41,11 +40,6 @@ const routes = [
   { 
     path: '/home', 
     component: Home,
-    meta: { requiresAuth: true }
-  },
-  { 
-    path: '/relatorio', 
-    component: Relatorio,
     meta: { requiresAuth: true }
   },
   { 

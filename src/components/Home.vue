@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <NavBar />
+    <NavBar/>
     <div class="home-container">
       <div class="welcome-banner">
         <h1>Painel Financeiro</h1>
@@ -11,8 +11,8 @@
         <div class="card income">
           <div class="card-icon">💰</div>
           <div class="card-content">
-            <h3>Entrada mensal</h3>
-            <p class="amount">{{ formatCurrency(financialSummary.income) }}</p>
+            <h3>Receita mensal</h3>
+            <p class="amount">{{ formatCurrency(resumoFinanceiro.total_receitas) }}</p>
           </div>
         </div>
         
@@ -20,7 +20,7 @@
           <div class="card-icon">💸</div>
           <div class="card-content">
             <h3>Despesa mensal</h3>
-            <p class="amount">{{ formatCurrency(financialSummary.expense) }}</p>
+            <p class="amount">{{ formatCurrency(resumoFinanceiro.total_despesas) }}</p>
           </div>
         </div>
         
@@ -28,15 +28,15 @@
           <div class="card-icon">⚠️</div>
           <div class="card-content">
             <h3>Situação financeira</h3>
-            <p class="status" :class="financialSummary.status.toLowerCase()">{{ financialSummary.status }}</p>
+            <p class="status">{{ situacaoFinanceira() }}</p>
           </div>
         </div>
         
-        <div class="card report">
-          <div class="card-icon">📊</div>
+        <div class="card saldo">
+          <div class="card-icon">💵</div>
           <div class="card-content">
-            <h3>Relatório</h3>
-            <router-link to="/relatorio" class="view-link">Ver detalhes</router-link>
+            <h3>Saldo mensal</h3>
+            <p class="amount">{{ formatCurrency(resumoFinanceiro.saldo) }}</p>
           </div>
         </div>
       </div>
@@ -46,57 +46,7 @@
         <div class="section-line"></div>
       </div>
 
-      <div class="detail-grid">
-        <div class="detail-card bills-to-pay">
-          <div class="card-header">
-            <div class="header-icon">📝</div>
-            <h3>Contas a pagar</h3>
-          </div>
-          <p class="amount">{{ formatCurrency(billsToPay) }}</p>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress" :style="{ width: (billsToPay / spendingLimit * 100) + '%' }"></div>
-            </div>
-            <p class="progress-text">{{ Math.round(billsToPay / spendingLimit * 100) }}% do limite</p>
-          </div>
-        </div>
-        
-        <div class="detail-card available-balance">
-          <div class="card-header">
-            <div class="header-icon">💵</div>
-            <h3>Saldo disponível</h3>
-          </div>
-          <p class="amount">{{ formatCurrency(financialSummary.balance) }}</p>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress success" :style="{ width: (financialSummary.balance > 0 ? (financialSummary.balance / financialSummary.income * 100) : 0) + '%' }"></div>
-            </div>
-            <p class="progress-text">{{ Math.round(financialSummary.balance > 0 ? (financialSummary.balance / financialSummary.income * 100) : 0) }}% do total</p>
-          </div>
-        </div>
       
-        <div class="detail-card receivables">
-          <div class="card-header">
-            <div class="header-icon">📋</div>
-            <h3>Patrimônio</h3>
-          </div>
-          <p class="no-data">Dados não disponíveis</p>
-        </div>
-        
-        <div class="detail-card spending-limit">
-          <div class="card-header">
-            <div class="header-icon">🎯</div>
-            <h3>Limite de gastos do mês</h3>
-          </div>
-          <p class="amount">{{ formatCurrency(spendingLimit) }}</p>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress warning" :style="{ width: spendingPercentage + '%' }"></div>
-            </div>
-            <p class="progress-text">{{ Math.round(spendingPercentage) }}% utilizado</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -105,69 +55,60 @@
 import NavBar from './NavBar.vue';
 import { TransactionService } from '../services/TransactionService';
 import { computed, ref, onMounted } from 'vue';
-
+import axios from 'axios';
 export default {
   name: 'Home',
   components: {
     NavBar
   },
-  setup() {
-    const currentDate = ref(new Date());
-    
-    // Obter transações do mês atual
-    const monthlyTransactions = TransactionService.getTransactionsByMonth(currentDate.value);
-    
-    // Calcular receitas e despesas
-    const financialSummary = computed(() => {
-      const transactions = monthlyTransactions.value;
-      const income = transactions
-        .filter(t => t.valor > 0)
-        .reduce((sum, t) => sum + t.valor, 0);
-      
-      const expense = transactions
-        .filter(t => t.valor < 0)
-        .reduce((sum, t) => sum + Math.abs(t.valor), 0);
-      
-      const balance = income - expense;
-      
-      // Determinar situação financeira
-      let status = 'Estável';
-      if (balance > income * 0.2) status = 'Ótimo';
-      else if (balance > 0) status = 'Bom';
-      else if (balance < 0) status = 'Crítico';
-      
-      return { income, expense, balance, status };
-    });
-    
-    // Calcular contas a pagar (simplificado)
-    const billsToPay = computed(() => {
-      return monthlyTransactions.value
-        .filter(t => t.valor < 0 && t.status === 'Pendente')
-        .reduce((sum, t) => sum + Math.abs(t.valor), 0);
-    });
-    
-    // Calcular limite de gastos (exemplo)
-    const spendingLimit = 900;
-    const spendingPercentage = computed(() => {
-      return Math.min(100, (financialSummary.value.expense / spendingLimit) * 100);
-    });
-    
-    // Formatar valores monetários
-    const formatCurrency = (value) => {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(value);
-    };
-    
+  data() {
     return {
-      financialSummary,
-      billsToPay,
-      spendingLimit,
-      spendingPercentage,
-      formatCurrency
+      resumoFinanceiro: [],
+      resumoFinanceiro: {
+        mes: 0,
+        ano: 0,
+        total_movimentacoes: 0,
+        total_receitas: 0,
+        total_despesas: 0,
+        saldo: 0,
+      },
     };
+  },
+  methods: {
+    formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    },
+
+    async fetchResumoFinanceiroMesAno() {
+      try {
+        let mes = new Date().getMonth() + 1;
+        let ano = new Date().getFullYear();
+
+        const response = await axios.get(`/ResumoFinanceiro/Mensal/${mes}/${ano}`);
+        this.resumoFinanceiro = response.data;
+      } catch (error) {
+        console.error('Error fetching financial summary:', error);
+        alert('Erro ao buscar resumo financeiro. Por favor, tente novamente.');
+      }
+    },
+
+    situacaoFinanceira() {
+      if (this.resumoFinanceiro.saldo > 500) {
+        return 'Boa';
+      } else if (this.resumoFinanceiro.saldo > 0) {
+        return 'Regular';
+      } else if (this.resumoFinanceiro.saldo < 0) {
+        return 'Crítico';
+      } else {
+        return 'Neutro';
+      }
+    }
+
+  },
+  mounted() {
+    this.fetchResumoFinanceiroMesAno();
   }
+
 }
 </script>
 
@@ -267,32 +208,20 @@ export default {
 }
 
 .financial-status {
-  border-left: 4px solid #F44336;
+  border-left: 4px solid #198b56;
 }
 
 .status {
-  color: #F44336;
+  color: #198b56;
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
 }
 
-.report {
+.saldo {
   border-left: 4px solid #2196F3;
 }
 
-.view-link {
-  color: #2196F3;
-  font-size: 0.9rem;
-  margin-top: 5px;
-  text-decoration: none;
-  display: inline-block;
-  transition: color 0.3s;
-}
-
-.view-link:hover {
-  color: #0D47A1;
-}
 
 .section-title {
   margin: 40px 0 20px;
@@ -312,107 +241,7 @@ export default {
   border-radius: 3px;
 }
 
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
 
-.detail-card {
-  background-color: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.detail-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.header-icon {
-  font-size: 1.6rem;
-  margin-right: 12px;
-}
-
-.detail-card h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.detail-card .amount {
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-.progress-container {
-  margin-top: 15px;
-}
-
-.progress-bar {
-  height: 8px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.progress {
-  height: 100%;
-  background-color: #FF9800;
-  border-radius: 4px;
-}
-
-.progress.success {
-  background-color: #4CAF50;
-}
-
-.progress.warning {
-  background-color: #FF5722;
-}
-
-.progress-text {
-  font-size: 0.8rem;
-  color: #757575;
-  text-align: right;
-  margin: 0;
-}
-
-.bills-to-pay {
-  border-bottom: 4px solid #FF9800;
-}
-
-.available-balance {
-  border-bottom: 4px solid #4CAF50;
-}
-
-.receivables {
-  border-bottom: 4px solid #2196F3;
-}
-
-.spending-limit {
-  border-bottom: 4px solid #9C27B0;
-}
-
-.no-data {
-  color: #757575;
-  font-style: italic;
-  font-size: 0.9rem;
-  margin: 20px 0;
-}
-
-.action-button {
-  display: none;
-}
 
 @media (max-width: 768px) {
   .home-container {

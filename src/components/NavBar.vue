@@ -3,7 +3,6 @@
     <div class="brand">FinTrack</div>
     <div class="nav-links">
       <router-link to="/home" class="nav-link">HOME</router-link>
-      <router-link to="/relatorio" class="nav-link">RELATÓRIO</router-link>
       <router-link to="/Movimentacoes" class="nav-link">MOVIMENTAÇÕES</router-link>
       <router-link to="/metas" class="nav-link">METAS</router-link>
       <router-link to="/patrimonio" class="nav-link">PATRIMÔNIO</router-link>
@@ -27,19 +26,16 @@
   </div>
   <div class="mobile-menu" :class="{ 'active': menuActive }">
     <router-link to="/home" class="mobile-link" @click="closeMenu">HOME</router-link>
-    <router-link to="/relatorio" class="mobile-link" @click="closeMenu">RELATÓRIO</router-link>
-    <router-link to="/receitas" class="mobile-link" @click="closeMenu">RECEITAS</router-link>
+    <router-link to="/Movimentacoes" class="mobile-link" @click="closeMenu">MOVIMENTAÇÕES</router-link>
     <router-link to="/metas" class="mobile-link" @click="closeMenu">METAS</router-link>
     <router-link to="/patrimonio" class="mobile-link" @click="closeMenu">PATRIMÔNIO</router-link>
     <router-link to="/" class="mobile-link landing-link" @click="closeMenu">INÍCIO</router-link>
     <router-link to="/perfil" class="mobile-link" @click="closeMenu">
       <span>PERFIL</span> 👤
     </router-link>
-    <div class="mobile-link settings" @click="closeMenu">
-    </div>
-    <div class="mobile-link logout" @click="logout">
+    <router-link to="/" class="mobile-link logout" @click="logout">
       <span>SAIR</span> 🚪
-    </div>
+    </router-link>
   </div>
 </template>
 
@@ -242,19 +238,19 @@ export default {
 }
 
 .mobile-link.logout {
-  background-color: rgba(244, 67, 54, 0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+  color: white;
+  text-decoration: none;
+  padding: 15px 20px;
+  text-align: center;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s;
 }
 
-.settings {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+.mobile-link.logout:hover {
+  background-color: rgba(244, 67, 54, 0.3);
 }
+
 
 .landing-button {
   color: #fff;
