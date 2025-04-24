@@ -42,7 +42,7 @@
       <!-- Filter Section -->
       <div class="filter-section">
         <h3>Filtrar por período</h3>
-        <div class="filter-controls">
+        <div class="filter-controls">       
           <div class="filter-group">
             <label for="filter-month">Mês</label>
             <select id="filter-month" v-model="filters.month" class="filter-input">
@@ -58,6 +58,27 @@
             </select>
           </div>
           <button class="filter-button" @click="resetFilters">
+            <span class="filter-icon">🔄</span> Limpar
+          </button>
+        </div>
+        <h3>Filtrar por tipo e categoria</h3>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label for="filter-tipo_mov">Tipo de Movimentação</label>
+            <select id="filter-tipo_mov" v-model="filters.tipo_mov" class="filter-input">
+              <option value="all">Todos</option>
+              <option value="receita">Receita</option>
+              <option value="despesa">Despesa</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-categoria">Categoria</label>
+            <select id="filter-categoria" v-model="filters.categoria" class="filter-input">
+              <option value="all">Todos</option>
+              <option v-for="categoria in availableCategories" :key="`categoria-${categoria}`" :value="categoria">{{ categoria }}</option>
+            </select>
+          </div>
+          <button class="filter-button" @click="resetFiltersTipoMov">
             <span class="filter-icon">🔄</span> Limpar
           </button>
         </div>
@@ -366,24 +387,36 @@ export default {
       },
       filters: {
         month: 'all',
-        year: 'all'
+        year: 'all',
+        tipo_mov: 'all',
+        categoria: 'all'
       },
-      availableYears: []
+      availableYears: [],
+      availableCategories_receita: ['Salário', 'Rendimento', 'Presente', 'Venda', 'Reembolso', 'Outros'],
+      availableCategories_despesa: ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Investimentos', 'Outros']
     }
   },
   mounted() {
     this.fetchMovimentacoes();
   },
   computed: {
+    availableCategories() {
+      if (this.filters.tipo_mov === 'all') {
+        return [...this.availableCategories_receita, ...this.availableCategories_despesa];
+      }
+      return this.filters.tipo_mov === 'receita' ? this.availableCategories_receita : this.availableCategories_despesa;
+    },
     filteredMovimentacoes() {
-      if (this.filters.month === 'all' && this.filters.year === 'all') {
+      if (this.filters.month === 'all' && this.filters.year === 'all' && this.filters.categoria === 'all' && this.filters.tipo_mov === 'all') {
         return this.movimentacoes;
       }
-      
+
       return this.movimentacoes.filter(mov => {
         const matchesMonth = this.filters.month === 'all' || mov.mes === parseInt(this.filters.month);
         const matchesYear = this.filters.year === 'all' || mov.ano === parseInt(this.filters.year);
-        return matchesMonth && matchesYear;
+        const matchesTipoMov = this.filters.tipo_mov === 'all' || mov.tipo_mov === this.filters.tipo_mov;
+        const matchesCategoria = this.filters.categoria === 'all' || mov.categoria_receita === this.filters.categoria || mov.categoria_despesa === this.filters.categoria;
+        return matchesMonth && matchesYear && matchesTipoMov && matchesCategoria;
       });
     }
   },
@@ -632,6 +665,12 @@ export default {
       this.filters.month = 'all';
       this.filters.year = 'all';
       this.fetchMovimentacoes();
+    },
+
+    resetFiltersTipoMov() {
+      this.filters.tipo_mov = 'all';
+      this.filters.categoria = 'all';
+      this.fetchMovimentacoes();
     }
 
   },
@@ -803,6 +842,7 @@ export default {
   align-items: center;
   justify-content: center;
   margin: 40px 0;
+  height: 100vh;
 }
 
 .loading-spinner {
@@ -1402,7 +1442,7 @@ label {
 }
 
 .filter-section h3 {
-  margin-top: 0;
+  margin-top: 15px;
   margin-bottom: 15px;
   color: #4CAF50;
   font-size: 1.2rem;
@@ -1415,7 +1455,7 @@ label {
 }
 
 .filter-group {
-  flex: 1;
+  flex: 1
 }
 
 .filter-group label {
