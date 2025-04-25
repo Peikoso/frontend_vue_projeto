@@ -2,8 +2,10 @@
   <div class="page-container">
     <NavBar />
     <div class="content-container">
-      <h1>Gerenciamento de Patrimônio</h1>
-      <p class="subtitle">Cadastre e gerencie seus bens e propriedades</p>
+      <div class="page-header">
+        <h1>Gerenciamento de Patrimônio</h1>
+        <p class="subtitle">Cadastre e gerencie seus bens e propriedades</p>
+      </div>
 
       <!-- Loading Spinner -->
       <div v-if="loading" class="loading-spinner-container">
@@ -356,16 +358,23 @@ export default {
   padding-bottom: 40px;
 }
 
-h1 {
-  color: #4CAF50;
+.page-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin: 20px 0 30px;
+  color: #333;
 }
 
-.subtitle {
-  text-align: center;
+.page-header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.page-header p {
+  font-size: 1.1rem;
   color: #666;
-  margin-bottom: 30px;
+  margin: 0;
 }
 
 /* Loading Spinner */
