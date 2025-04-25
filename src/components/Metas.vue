@@ -342,7 +342,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('/Meta');
+        const response = await axios.get('/Meta/');
         this.metas = response.data;
       } catch (error) {
         console.error('Error fetching metas:', error);
@@ -352,15 +352,6 @@ export default {
       }
     },
     
-    async getMetaById(id) {
-      try {
-        const response = await axios.get(`/Meta/${id}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error fetching meta with id ${id}:`, error);
-        throw error;
-      }
-    },
     
     async saveMeta() {
       this.isLoading = true;
@@ -384,7 +375,7 @@ export default {
           await axios.put(`/Meta/${this.selectedMeta.id_meta}`, this.formData);
         } else {
           // Create new meta
-          await axios.post('/Meta', this.formData);
+          await axios.post('/Meta/', this.formData);
         }
         
         // Refresh the list and close modal

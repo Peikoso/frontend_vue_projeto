@@ -298,7 +298,7 @@ export default {
       this.error = null;
 
       try {
-        const response = await axios.get('/Usuario');
+        const response = await axios.get('/Usuario/');
         this.userData = response.data;
         
         // Initialize form with user data
@@ -373,7 +373,7 @@ export default {
           senha: this.form.new_password
         };
         
-        await axios.put('/Usuario', updateData);
+        await axios.put('/Usuario/', updateData);
         
         // Update local storage with new login if it was changed
         if (this.userData.login !== this.form.login) {
@@ -415,7 +415,7 @@ export default {
       this.deleting = true;
 
       try {
-        await axios.delete('/Usuario', {
+        await axios.delete('/Usuario/', {
           data: { password: this.deletePassword }
         });
         

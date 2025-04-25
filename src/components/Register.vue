@@ -172,7 +172,7 @@ export default {
       }
       
       // Send registration request
-      axios.post('http://localhost:8000/Usuario/Cadastro', this.formData)
+      axios.post('/Usuario/Cadastro', this.formData)
         .then(response => {
           console.log('Registration successful:', response.data);
           this.success = 'Cadastro realizado com sucesso! Redirecionando para o login...';

@@ -222,7 +222,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('/ResumoFinanceiro');
+        const response = await axios.get('/ResumoFinanceiro/');
         this.resumoFinanceiro = response.data;
         this.availableYears = [...new Set(this.resumoFinanceiro.map(resumo => resumo.ano))].sort();
         console.log(this.resumoFinanceiro);

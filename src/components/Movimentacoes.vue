@@ -426,7 +426,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('/Movimentacao');
+        const response = await axios.get('/Movimentacao/');
         this.movimentacoes = response.data;
         this.availableYears = [...new Set(this.movimentacoes.map(mov => mov.ano))].sort();
         console.log(this.movimentacoes)
@@ -523,7 +523,7 @@ export default {
         
         if (!this.showEditModal && !this.showEditModalFile) {
           // Create new movimentacao
-          await axios.post('/Movimentacao', formDataToSend);
+          await axios.post('/Movimentacao/', formDataToSend);
         }
         
         // Refresh the list and close modal

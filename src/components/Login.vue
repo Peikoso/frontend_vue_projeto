@@ -107,7 +107,7 @@ export default {
         formData: formData.toString()
       });
       
-      const response = axios.post('http://localhost:8000/Usuario/token', formData, {
+      const response = axios.post('/Usuario/token', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },

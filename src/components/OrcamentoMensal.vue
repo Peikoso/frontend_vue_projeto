@@ -280,7 +280,7 @@ export default {
       this.error = null;
       
       try {
-        const response = await axios.get('/OrcamentoMensal', {
+        const response = await axios.get('/OrcamentoMensal/', {
           params: {
             mes: this.filters.month,
             ano: this.filters.year
@@ -309,7 +309,7 @@ export default {
           await axios.put(`/OrcamentoMensal/${this.selectedOrcamento.id_orcamento}`, this.formData);
         } else {
           // Create new orcamento
-          await axios.post('/OrcamentoMensal', this.formData);
+          await axios.post('/OrcamentoMensal/', this.formData);
         }
         
         // Refresh the list and close modal

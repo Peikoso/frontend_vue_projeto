@@ -226,7 +226,7 @@ export default {
     async fetchPatrimonio() {
       this.loading = true;
       try {
-        const response = await axios.get('/Patrimonio');
+        const response = await axios.get('/Patrimonio/');
         this.patrimonio = response.data;
       } catch (error) {
         console.error('Erro ao buscar dados de patrimônio:', error);
@@ -273,7 +273,7 @@ export default {
           alert('Bem atualizado com sucesso!');
         } else {
           // Create new bem
-          await axios.post('/Patrimonio', this.formData);
+          await axios.post('/Patrimonio/', this.formData);
           alert('Bem adicionado com sucesso!');
         }
         
