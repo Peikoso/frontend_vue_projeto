@@ -102,8 +102,8 @@
       </div>
 
       <!-- Add/Edit Modal -->
-      <div class="modal" v-if="showAddModal || showEditModal">
-        <div class="modal-content">
+      <div class="modal" v-if="showAddModal || showEditModal" @click="closeModal">
+        <div class="modal-content" @click.stop>
           <div class="modal-header">
             <h2>{{ showEditModal ? 'Editar Meta' : 'Nova Meta' }}</h2>
             <button class="close-button" @click="closeModal">×</button>
@@ -177,11 +177,11 @@
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <div class="modal" v-if="showDeleteModal">
-        <div class="modal-content delete-modal">
+      <div class="modal" v-if="showDeleteModal" @click="closeModal">
+        <div class="modal-content delete-modal" @click.stop>
           <div class="modal-header">
             <h2>Excluir Meta</h2>
-            <button class="close-button" @click="showDeleteModal = false">×</button>
+            <button class="close-button" @click="closeModal">×</button>
           </div>
           
           <div class="modal-body">
@@ -190,7 +190,7 @@
           </div>
           
           <div class="modal-footer">
-            <button class="cancel-button" @click="showDeleteModal = false">Cancelar</button>
+            <button class="cancel-button" @click="closeModal">Cancelar</button>
             <button class="delete-button" @click="deleteMeta" :disabled="isLoading">
               {{ isLoading ? 'Excluindo...' : 'Excluir' }}
             </button>
@@ -199,11 +199,11 @@
       </div>
 
       <!-- View Details Modal -->
-      <div class="modal" v-if="showDetailsModal && selectedMeta">
-        <div class="modal-content details-modal">
+      <div class="modal" v-if="showDetailsModal && selectedMeta" @click="closeModal">
+        <div class="modal-content details-modal" @click.stop>
           <div class="modal-header">
             <h2>Detalhes da Meta</h2>
-            <button class="close-button" @click="showDetailsModal = false">×</button>
+            <button class="close-button" @click="closeModal">×</button>
           </div>
           
           <div class="modal-body">
@@ -274,7 +274,7 @@
           </div>
           
           <div class="modal-footer">
-            <button class="cancel-button" @click="showDetailsModal = false">Fechar</button>
+            <button class="cancel-button" @click="closeModal">Fechar</button>
             <button class="edit-button" @click="editFromDetails">Editar</button>
           </div>
         </div>
@@ -452,6 +452,8 @@ export default {
     closeModal() {
       this.showAddModal = false;
       this.showEditModal = false;
+      this.showDeleteModal = false;
+      this.showDetailsModal = false;
       this.resetForm();
     },
     

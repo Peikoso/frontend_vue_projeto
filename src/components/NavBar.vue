@@ -4,6 +4,7 @@
     <div class="nav-links">
       <router-link to="/home" class="nav-link">HOME</router-link>
       <router-link to="/Movimentacoes" class="nav-link">MOVIMENTAÇÕES</router-link>
+      <router-link to="/orcamento" class="nav-link">ORÇAMENTO</router-link>
       <router-link to="/metas" class="nav-link">METAS</router-link>
       <router-link to="/patrimonio" class="nav-link">PATRIMÔNIO</router-link>
       <router-link to="/" class="nav-link landing-button">INÍCIO</router-link>
@@ -27,6 +28,7 @@
   <div class="mobile-menu" :class="{ 'active': menuActive }">
     <router-link to="/home" class="mobile-link" @click="closeMenu">HOME</router-link>
     <router-link to="/Movimentacoes" class="mobile-link" @click="closeMenu">MOVIMENTAÇÕES</router-link>
+    <router-link to="/orcamento" class="mobile-link" @click="closeMenu">ORÇAMENTO</router-link>
     <router-link to="/metas" class="mobile-link" @click="closeMenu">METAS</router-link>
     <router-link to="/patrimonio" class="mobile-link" @click="closeMenu">PATRIMÔNIO</router-link>
     <router-link to="/" class="mobile-link landing-link" @click="closeMenu">INÍCIO</router-link>
