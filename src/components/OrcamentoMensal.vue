@@ -56,6 +56,11 @@
             </button>
         </div>
         
+        <div class="orcamento-total">
+          <h2>Total: R$ {{ formatCurrency(totalOrcamento()) }}</h2>
+          <div class="section-line"></div>
+        </div>
+
         <!-- Empty State -->
         <div v-if="orcamentos.length === 0" class="empty-state">
             <span class="empty-icon">📝</span>
@@ -63,6 +68,7 @@
             <p>Comece a definir limites de gastos para suas categorias</p>
         </div>
         
+
         <!-- Orçamentos Grid -->
         <div v-else class="orcamentos-grid">
             <div v-for="orcamento in orcamentos" :key="orcamento.id_orcamento" class="orcamento-card" :class="getCardClass(orcamento.categoria)">
@@ -266,7 +272,7 @@ export default {
       try {
         const response = await axios.get('/OrcamentoMensal/All');
         this.orcamentoAll = response.data;
-        this.yearRange = [new Date().getFullYear(), ...new Set(this.orcamentoAll.map(orcamento => orcamento.ano))].sort();	
+        this.yearRange = [...new Set([new Date().getFullYear(), ...this.orcamentoAll.map(orcamento => orcamento.ano)])].sort();	
       } catch (error) {
         console.error('Error fetching orcamentos:', error);
         this.error = 'Não foi possível carregar os orçamentos. Por favor, tente novamente.';
@@ -413,6 +419,11 @@ export default {
     },
     
     // Utility Methods
+
+    totalOrcamento() {
+      return this.orcamentos.reduce((total, orcamento) => total + orcamento.valor_previsto, 0);
+    },
+
     formatCurrency(value) {
       return parseFloat(value).toFixed(2).replace('.', ',');
     },
@@ -929,6 +940,22 @@ export default {
   font-weight: 500;
   margin-top: 10px;
 }
+
+.orcamento-total {
+  margin: 40px 0 20px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.section-line {
+  height: 3px;
+  width: 150px;
+  background-color: #4CAF50;
+  border-radius: 3px;
+}
+
 
 /* Responsive Styles */
 @media (max-width: 768px) {
