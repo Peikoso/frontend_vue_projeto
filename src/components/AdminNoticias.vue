@@ -61,8 +61,8 @@
         :key="noticia.id" 
         class="noticia-card"
       >
-        <div class="card-image" v-if="noticia.imagem">
-          <img :src="noticia.imagem" :alt="noticia.titulo">
+        <div class="card-image" v-if="noticia.imagemUrl">
+          <img :src="noticia.imagemUrl" :alt="noticia.titulo">
         </div>
         <div class="card-image placeholder" v-else>
           <i class="fas fa-image"></i>
@@ -155,13 +155,25 @@
 
             <div class="form-group">
               <label for="imagem">Imagem</label>
-              <input 
-                type="url" 
-                id="imagem" 
-                v-model="form.imagem" 
-                class="form-control"
-                placeholder="https://exemplo.com/imagem.jpg"
-              >
+              <div class="image-input-container">
+                <input 
+                  type="number" 
+                  id="imagem" 
+                  v-model="form.imagem" 
+                  class="form-control"
+                  placeholder="Imagem ID: 1"
+                >
+                <button type="button" class="btn-primary btn-select-image" @click="showImageManagerModal">
+                  <i class="fas fa-images"></i> Selecionar
+                </button>
+              </div>
+              <div v-if="form.imagem" class="selected-image-preview">
+                <img v-if="previewImageUrl" :src="previewImageUrl" alt="Imagem selecionada" />
+                <div v-else class="preview-placeholder">
+                  <i class="fas fa-image"></i>
+                  <span>Imagem #{{ form.imagem }}</span>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">
@@ -226,6 +238,127 @@
         </div>
       </div>
     </div>
+
+    <!-- Image Manager Modal -->
+    <div v-if="showImageModal" class="modal-overlay" @click="closeImageManagerModal">
+      <div class="modal-content large-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Gerenciador de Imagens</h3>
+          <button class="btn-close" @click="closeImageManagerModal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Upload new image section -->
+          <div class="image-upload-section">
+            <h4>Enviar Nova Imagem</h4>
+            <form @submit.prevent="uploadImage" class="upload-form">
+              <div class="form-group">
+                <label for="fileInput">Selecione uma imagem:</label>
+                <input 
+                  type="file" 
+                  id="fileInput" 
+                  ref="fileInput"
+                  accept="image/*"
+                  @change="handleFileChange"
+                  class="form-control"
+                >
+              </div>
+              <button 
+                type="submit" 
+                class="btn-primary" 
+                :disabled="!selectedFile || uploadingImage"
+              >
+                <span v-if="!uploadingImage">Enviar</span>
+                <div v-else class="btn-spinner"></div>
+              </button>
+            </form>
+          </div>
+
+          <!-- Loading state -->
+          <div v-if="loadingImages" class="loading-state">
+            <div class="spinner"></div>
+            <p>Carregando imagens...</p>
+          </div>
+
+          <!-- Error state -->
+          <div v-if="imageError" class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ imageError }}</p>
+            <button class="btn-retry" @click="fetchImages">Tentar novamente</button>
+          </div>
+
+          <!-- Images grid -->
+          <div v-if="!loadingImages && !imageError && images.length === 0" class="empty-state small-empty">
+            <i style="color: #333;" class="fas fa-image"></i>
+            <p>Nenhuma imagem encontrada</p>
+          </div>
+
+          <div v-if="!loadingImages && !imageError && images.length > 0" class="images-grid">
+            <div 
+              v-for="image in images" 
+              :key="image.id" 
+              class="image-item"
+              :class="{ 'selected': form.imagem === image.id, 'to-be-selected': selectedImageUrl === image.id && form.imagem !== image.id }"
+              @click="selectImage(image)"
+            >
+              <img :src="image.imagem_url" :alt="image.nome || 'Imagem'" />
+              <div class="image-actions">
+                <button 
+                  type="button" 
+                  class="btn-delete-small" 
+                  @click.stop="confirmDeleteImage(image)"
+                  title="Excluir"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" @click="closeImageManagerModal">Cancelar</button>
+          <button 
+            type="button" 
+            class="btn-primary" 
+            @click="confirmImageSelection"
+            :disabled="!selectedImageUrl"
+          >
+            Confirmar Seleção
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Image Confirmation Modal -->
+    <div v-if="showDeleteImageModal" class="modal-overlay" @click="cancelDeleteImage">
+      <div class="modal-content delete-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Confirmar Exclusão</h3>
+          <button class="btn-close" @click="cancelDeleteImage">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="delete-confirmation">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Tem certeza que deseja excluir esta imagem?</p>
+            <p class="delete-warning">Esta ação não pode ser desfeita!</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" @click="cancelDeleteImage">Cancelar</button>
+            <button 
+              class="btn-danger" 
+              @click="deleteImage"
+              :disabled="deletingImage"
+            >
+              <span v-if="!deletingImage">Confirmar Exclusão</span>
+              <div v-else class="btn-spinner"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -250,7 +383,20 @@ export default {
       formSubmitting: false,
       deleteSubmitting: false,
       formError: null,
-      form: this.getEmptyForm()
+      form: this.getEmptyForm(),
+      
+      // Image manager related data
+      showImageModal: false,
+      showDeleteImageModal: false,
+      images: [],
+      loadingImages: false,
+      imageError: null,
+      selectedImageUrl: null,
+      selectedImage: null,
+      selectedFile: null,
+      uploadingImage: false,
+      deletingImage: false,
+      previewImageUrl: null,
     };
   },
   computed: {
@@ -304,13 +450,29 @@ export default {
         criado_em: '',
       };
     },
+    async fetchImagem(id) {
+      const response = await axios.get(`/Admin/Imagem/${id}`);
+      const imagem = String(response.data.imagem_url);
+      return imagem;
+    },
     async fetchNoticias() {
       this.loading = true;
       this.error = null;
       
       try {
         const response = await axios.get('/Admin/Noticia');
-        this.noticias = response.data;
+        const noticiasRecebidas = response.data;
+
+        for (const noticia of noticiasRecebidas) {
+          if (noticia.imagem) {
+            noticia.imagemUrl = await this.fetchImagem(noticia.imagem);
+          }
+          if(!noticia.imagem) {
+            noticia.imagemUrl = null;
+          }
+        }
+
+        this.noticias = noticiasRecebidas;
       } catch (err) {
         console.error('Erro ao buscar notícias:', err);
         this.error = 'Não foi possível carregar as notícias. Tente novamente.';
@@ -336,13 +498,6 @@ export default {
         minute: '2-digit'
       };
       return new Date(dateString).toLocaleDateString('pt-BR', options);
-    },
-    getStatusText(status) {
-      switch(status) {
-        case 'published': return 'Publicada';
-        case 'draft': return 'Rascunho';
-        default: return status;
-      }
     },
     getCategoryName(categoryId) {
       const category = this.categorias.find(c => c.id === categoryId);
@@ -372,6 +527,9 @@ export default {
         imagem: noticia.imagem || '',
         criado_em: noticia.criado_em || '',
       };
+      
+      // Load preview image if imagem is set
+      this.loadPreviewImage();
       
       this.showModal = true;
       this.formError = null;
@@ -462,6 +620,172 @@ export default {
     searchNoticias() {
       // This is handled by the computed property
       // Just added for clarity of UX with the search button
+    },
+    
+    // Image Manager Methods
+    showImageManagerModal() {
+      this.showImageModal = true;
+      this.selectedImageUrl = this.form.imagem.id;
+      this.fetchImages();
+    },
+    
+    closeImageManagerModal() {
+      this.showImageModal = false;
+      this.selectedImageUrl = null;
+      this.selectedFile = null;
+    },
+    
+    async fetchImages() {
+      this.loadingImages = true;
+      this.imageError = null;
+      
+      try {
+        const token = localStorage.getItem('adminToken');
+        const tokenType = localStorage.getItem('adminTokenType') || 'Bearer';
+        
+        const response = await axios.get('/Admin/Imagem', {
+          headers: {
+            'Authorization': `${tokenType} ${token}`
+          }
+        });
+        
+        this.images = response.data;
+        
+        // Update preview image if we have a selected image
+        if (this.form.imagem) {
+          this.loadPreviewImage();
+        }
+      } catch (err) {
+        console.error('Erro ao buscar imagens:', err);
+        this.imageError = 'Não foi possível carregar as imagens. Tente novamente.';
+      } finally {
+        this.loadingImages = false;
+      }
+    },
+    
+    selectImage(image) {
+      this.selectedImageUrl = image.id;
+      this.selectedImage = image;
+    },
+    
+    confirmImageSelection() {
+      this.form.imagem = this.selectedImageUrl;
+      this.previewImageUrl = this.selectedImage ? this.selectedImage.imagem_url : null;
+      this.closeImageManagerModal();
+    },
+    
+    handleFileChange(e) {
+      this.selectedFile = e.target.files[0];
+    },
+    
+    async uploadImage() {
+      if (!this.selectedFile) {
+        return;
+      }
+      
+      this.uploadingImage = true;
+      
+      try {
+        const token = localStorage.getItem('adminToken');
+        const tokenType = localStorage.getItem('adminTokenType') || 'Bearer';
+        
+        const formData = new FormData();
+        formData.append('imagem', this.selectedFile);
+        
+        
+        const response = await axios.post('/Admin/Imagem', formData, {
+          headers: {
+            'Authorization': `${tokenType} ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        // Refresh images list
+        await this.fetchImages();
+        
+        // Reset file input
+        this.$refs.fileInput.value = '';
+        this.selectedFile = null;
+      } catch (err) {
+        console.error('Erro ao enviar imagem:', err);
+        alert('Erro ao enviar imagem. Tente novamente.');
+      } finally {
+        this.uploadingImage = false;
+      }
+    },
+    
+    confirmDeleteImage(image) {
+      this.selectedImage = image;
+      this.showDeleteImageModal = true;
+      // Stop event propagation to prevent image selection
+      event.stopPropagation();
+    },
+    
+    cancelDeleteImage() {
+      this.showDeleteImageModal = false;
+      this.selectedImage = null;
+    },
+    
+    async deleteImage() {
+      this.deletingImage = true;
+      
+      try {
+        const token = localStorage.getItem('adminToken');
+        const tokenType = localStorage.getItem('adminTokenType') || 'Bearer';
+        
+        await axios.delete(`/Admin/Imagem/${this.selectedImage.id}`, {
+          headers: {
+            'Authorization': `${tokenType} ${token}`
+          }
+        });
+        
+        // If deleted image was selected, clear selection
+        if (this.selectedImageUrl === this.selectedImage.id) {
+          this.selectedImageUrl = null;
+        }
+        
+        // If deleted image was used in form, clear form image
+        if (this.form.imagem === this.selectedImage.id) {
+          this.form.imagem = '';
+        }
+        
+        // Refresh images list
+        await this.fetchImages();
+        
+        this.cancelDeleteImage();
+      } catch (err) {
+        console.error('Erro ao excluir imagem:', err);
+        alert('Erro ao excluir imagem. Tente novamente.');
+      } finally {
+        this.deletingImage = false;
+      }
+    },
+    loadPreviewImage() {
+      if (this.form.imagem) {
+        // Find image in the existing images array
+        const image = this.images.find(img => img.id === this.form.imagem);
+        if (image) {
+          this.previewImageUrl = image.imagem_url;
+          return;
+        }
+        
+        // If not found in the array, try to fetch it
+        this.fetchImagePreview(this.form.imagem);
+      } else {
+        this.previewImageUrl = null;
+      }
+    },
+    
+    async fetchImagePreview(imageId) {
+      try {
+        const response = await axios.get(`/Admin/Imagem/${imageId}`);
+        if (response.data && response.data.imagem_url) {
+          this.previewImageUrl = response.data.imagem_url;
+        }
+      } catch (err) {
+        console.error('Erro ao buscar preview da imagem:', err);
+        this.previewImageUrl = null;
+      }
     }
   }
 };
@@ -804,6 +1128,7 @@ label {
 }
 
 .delete-confirmation {
+  color: #f44336;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1009,5 +1334,130 @@ button:disabled {
   .filter-options {
     margin-top: 16px;
   }
+}
+
+.image-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-select-image {
+  white-space: nowrap;
+}
+
+.image-upload-section {
+  color: #333;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.image-upload-section h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #424242;
+}
+
+.upload-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.upload-form .form-group {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.image-item {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  height: 150px;
+  transition: all 0.2s;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-item.selected {
+  box-shadow: 0 0 0 3px #4CAF50, 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.image-item.to-be-selected {
+  box-shadow: 0 0 0 3px #2196F3, 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.image-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.image-item:hover .image-actions {
+  opacity: 1;
+}
+
+.small-empty {
+  padding: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.selected-image-preview {
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selected-image-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9e9e9e;
+  gap: 8px;
+}
+
+.preview-placeholder i {
+  font-size: 48px;
 }
 </style> 
