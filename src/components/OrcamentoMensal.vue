@@ -42,8 +42,8 @@
                 </select>
             </div>
             
-            <button @click="fetchOrcamentos" class="filter-button">
-                <span class="filter-icon">🔄</span> Filtrar
+            <button @click="clearFilters" class="filter-button">
+                <span class="filter-icon">🔄</span> Limpar
             </button>
             </div>
         </div>
@@ -416,6 +416,11 @@ export default {
         ano: ''
       };
       this.selectedOrcamento = null;
+    },
+
+    clearFilters() {
+      this.filters.month = new Date().getMonth() + 1;
+      this.filters.year = new Date().getFullYear();
     },
     
     // Utility Methods

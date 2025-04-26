@@ -56,30 +56,6 @@
             <p class="amount">{{ formatCurrency(resumoFinanceiroOutros.total_patrimonio) }}</p>
           </div>
         </div>
-        
-        <div class="card investimentos">
-          <div class="card-icon">📈</div>
-          <div class="card-content">
-            <h3>Total de investimentos</h3>
-            <p class="amount">{{ formatCurrency(resumoFinanceiroOutros.total_investido_final) }}</p>
-          </div>
-        </div>
-        
-        <div class="card proventos">
-          <div class="card-icon">💶</div>
-          <div class="card-content">
-            <h3>Total de proventos</h3>
-            <p class="amount">{{ formatCurrency(resumoFinanceiroOutros.total_proventos) }}</p>
-          </div>
-        </div>
-        
-        <div class="card dividas">
-          <div class="card-icon">💳</div>
-          <div class="card-content">
-            <h3>Total de dividas</h3>
-            <p class="amount">{{ formatCurrency(resumoFinanceiroOutros.total_dividas) }}</p>
-          </div>
-        </div>
 
       </div>
       
@@ -141,14 +117,6 @@
             <span class="year">{{ resumo.ano }}</span>
           </div>
           <div class="finance-details">
-            <div class="detail-item">
-              <span class="detail-label"><i class="detail-icon">📅</i> Mês</span>
-              <span class="detail-value">{{ resumo.mes }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label"><i class="detail-icon">📆</i> Ano</span>
-              <span class="detail-value">{{ resumo.ano }}</span>
-            </div>
             <div class="detail-item">
               <span class="detail-label"><i class="detail-icon">🔄</i> Movimentações</span>
               <span class="detail-value">{{ resumo.total_movimentacoes }}</span>

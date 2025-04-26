@@ -47,7 +47,7 @@
             <label for="filter-month">Mês</label>
             <select id="filter-month" v-model="filters.month" class="filter-input">
               <option value="all">Todos</option>
-              <option v-for="n in 12" :key="`month-${n}`" :value="n">{{ n }}</option>
+              <option v-for="n in 12" :key="`month-${n}`" :value="n">{{ getMonthName(n) }}</option>
             </select>
           </div>
           <div class="filter-group">
@@ -57,7 +57,7 @@
               <option v-for="year in availableYears" :key="`year-${year}`" :value="year">{{ year }}</option>
             </select>
           </div>
-          <button class="filter-button" @click="resetFilters">
+          <button class="filter-button" @click="clearFilters">
             <span class="filter-icon">🔄</span> Limpar
           </button>
         </div>
@@ -386,8 +386,8 @@ export default {
         outros: { value: 'outros', name: 'Outros', icon: '📌' },
       },
       filters: {
-        month: 'all',
-        year: 'all',
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
         tipo_mov: 'all',
         categoria: 'all'
       },
@@ -643,6 +643,15 @@ export default {
     },
     
     // Utility Methods
+
+    getMonthName(monthNumber) {
+      const months = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      return months[monthNumber - 1];
+    },
+
     formatCurrency(value) {
       return parseFloat(value).toFixed(2).replace('.', ',');
     },
@@ -666,6 +675,12 @@ export default {
     resetFilters() {
       this.filters.month = 'all';
       this.filters.year = 'all';
+      this.fetchMovimentacoes();
+    },
+
+    clearFilters() {
+      this.filters.month = new Date().getMonth() + 1;
+      this.filters.year = new Date().getFullYear();
       this.fetchMovimentacoes();
     },
 

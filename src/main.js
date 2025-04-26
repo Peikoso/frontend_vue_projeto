@@ -14,6 +14,7 @@ import Register from './components/Register.vue'
 import LandingPage from './components/LandingPage.vue'
 import Perfil from './components/Perfil.vue'
 import Patrimonio from './components/Patrimonio.vue'
+import GastoMensal from './components/GastoMensal.vue'
 
 // Configure Axios
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
@@ -66,6 +67,11 @@ const routes = [
   { 
     path: '/patrimonio', 
     component: Patrimonio,
+    meta: { requiresAuth: true }
+  },
+  { 
+    path: '/gastos', 
+    component: GastoMensal,
     meta: { requiresAuth: true }
   },
   { path: '/register', component: Register }
