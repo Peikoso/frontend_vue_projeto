@@ -50,7 +50,7 @@
       <div v-if="!loading && !error && filteredNoticias.length > 0" class="noticias-grid">
         <div v-for="noticia in filteredNoticias" :key="noticia.id" class="noticia-card">
           <div class="noticia-image">
-            <img :src="noticia.imagem_url || getPlaceholderImage(noticia.id)" alt="Imagem da notícia">
+            <img :src="noticia.imagemUrl || getPlaceholderImage(noticia.id)" alt="Imagem da notícia">
             <div class="categoria-badge">{{ getCategoriaName(noticia.categoria_id) }}</div>
           </div>
           <div class="noticia-content">
@@ -119,6 +119,11 @@ export default {
     this.fetchData();
   },
   methods: {
+    async fetchImagem(id) {
+      const response = await axios.get(`/Admin/Imagem/${id}`);
+      const imagem = String(response.data.imagem_url);
+      return imagem;
+    },
     async fetchData() {
       this.loading = true;
       this.error = null;
@@ -129,8 +134,19 @@ export default {
         this.categorias = categoriasResponse.data;
         
         // Fetch news
-        const noticiasResponse = await axios.get('/Admin/Noticia');
-        this.noticias = noticiasResponse.data;
+        const response = await axios.get('/Admin/Noticia');
+        const noticiasRecebidas = response.data;
+
+        for (const noticia of noticiasRecebidas) {
+          if (noticia.imagem) {
+            noticia.imagemUrl = await this.fetchImagem(noticia.imagem);
+          }
+          if(!noticia.imagem) {
+            noticia.imagemUrl = null;
+          }
+        }
+
+        this.noticias = noticiasRecebidas;
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         this.error = 'Ocorreu um erro ao carregar os dados. Por favor, tente novamente.';
