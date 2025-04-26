@@ -1,5 +1,6 @@
 import './assets/main.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
+import '@fortawesome/fontawesome-free/js/all.js'
 
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -15,6 +16,10 @@ import LandingPage from './components/LandingPage.vue'
 import Perfil from './components/Perfil.vue'
 import Patrimonio from './components/Patrimonio.vue'
 import GastoMensal from './components/GastoMensal.vue'
+import Noticias from './components/Noticias.vue'
+import Admin from './components/Admin.vue'
+import AdminLogin from './components/AdminLogin.vue'
+import AdminNoticias from './components/AdminNoticias.vue'
 
 // Configure Axios
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
@@ -74,7 +79,16 @@ const routes = [
     component: GastoMensal,
     meta: { requiresAuth: true }
   },
-  { path: '/register', component: Register }
+  { 
+    path: '/noticias', 
+    component: Noticias,
+    meta: { requiresAuth: false }
+  },
+  { path: '/register', component: Register },
+  
+  { path: '/admin', component: Admin },
+  { path: '/admin/login', component: AdminLogin },
+  { path: '/admin/noticias', component: AdminNoticias },
 ]
 
 const router = createRouter({
@@ -93,7 +107,7 @@ axios.interceptors.response.use(
       localStorage.removeItem('userInfo')
       
       // Redirect to login page
-      router.push('/login')
+      router.push('/')
     }
     return Promise.reject(error)
   }

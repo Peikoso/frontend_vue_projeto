@@ -1,0 +1,1013 @@
+<template>
+  <div class="admin-section">
+    <div class="section-header">
+      <button class="btn-primary" @click="showAddModal">
+        <i class="fas fa-plus"></i> Nova Notícia
+      </button>
+    </div>
+
+    <!-- Loading and Error states -->
+    <div v-if="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Carregando notícias...</p>
+    </div>
+
+    <div v-if="error" class="error-state">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>{{ error }}</p>
+      <button class="btn-retry" @click="fetchNoticias">Tentar novamente</button>
+    </div>
+
+    <!-- Search & filter -->
+    <div v-if="!loading && !error" class="filters-container">
+      <div class="search-box">
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          placeholder="Pesquisar notícias..." 
+          class="search-input"
+        >
+      </div>
+      
+      <div class="filter-options">
+        <div class="filter-item">
+          <label for="category-filter">Categoria:</label>
+          <select id="category-filter" v-model="categoryFilter" class="filter-select">
+            <option value="all">Todas</option>
+            <option 
+              v-for="categoria in categorias" 
+              :key="categoria.id" 
+              :value="categoria.id"
+            >
+              {{ categoria.nome }}
+            </option>
+          </select>
+        </div>
+    
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div v-if="!loading && !error && filteredNoticias.length === 0" class="empty-state">
+      <i class="fas fa-newspaper"></i>
+      <p>Nenhuma notícia encontrada</p>
+      <button class="btn-primary" @click="showAddModal">Adicionar agora</button>
+    </div>
+
+    <!-- Card grid -->
+    <div v-if="!loading && !error && filteredNoticias.length > 0" class="cards-grid">
+      <div 
+        v-for="noticia in filteredNoticias" 
+        :key="noticia.id" 
+        class="noticia-card"
+      >
+        <div class="card-image" v-if="noticia.imagem">
+          <img :src="noticia.imagem" :alt="noticia.titulo">
+        </div>
+        <div class="card-image placeholder" v-else>
+          <i class="fas fa-image"></i>
+        </div>
+        
+        <div class="card-content">
+          <div class="card-header">
+            <span class="card-category">{{ getCategoryName(noticia.categoria_id) }}</span>
+          </div>
+          
+          <h3 class="card-title">{{ noticia.titulo }}</h3>
+          
+          <div class="card-meta">
+            <div class="meta-item">
+              <i class="fas fa-user"></i>
+              <span>{{ noticia.autor }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{ formatDate(noticia.criado_em) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-actions">
+          <button class="btn-edit-small" @click="editNoticia(noticia)" title="Editar">
+            <i class="fas fa-edit"></i>
+          </button>
+
+          <button class="btn-delete-small" @click="confirmDelete(noticia)" title="Excluir">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content large-modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ isEditing ? 'Editar Notícia' : 'Nova Notícia' }}</h3>
+          <button class="btn-close" @click="closeModal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <form @submit.prevent="saveNoticia">
+            <div class="form-group">
+              <label for="titulo">Título *</label>
+              <input 
+                type="text" 
+                id="titulo" 
+                v-model="form.titulo" 
+                required
+                class="form-control"
+              >
+            </div>
+
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="categoria">Categoria *</label>
+                <select 
+                  id="categoria" 
+                  v-model="form.categoria_id" 
+                  required
+                  class="form-control"
+                >
+                  <option value="" disabled>Selecione uma categoria</option>
+                  <option 
+                    v-for="categoria in categorias" 
+                    :key="categoria.id" 
+                    :value="categoria.id"
+                  >
+                    {{ categoria.nome }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="autor">Autor *</label>
+                <input 
+                  type="text" 
+                  id="autor" 
+                  v-model="form.autor" 
+                  required
+                  class="form-control"
+                >
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="imagem">Imagem</label>
+              <input 
+                type="url" 
+                id="imagem" 
+                v-model="form.imagem" 
+                class="form-control"
+                placeholder="https://exemplo.com/imagem.jpg"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="conteudo">Conteúdo *</label>
+              <textarea 
+                id="conteudo" 
+                v-model="form.conteudo" 
+                required
+                class="form-control content-editor"
+                rows="12"
+              ></textarea>
+            </div>
+
+
+            <div v-if="formError" class="form-error">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ formError }}
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" @click="closeModal">Cancelar</button>
+              <button 
+                type="submit" 
+                class="btn-primary" 
+                :disabled="formSubmitting"
+              >
+                <span v-if="!formSubmitting">Salvar</span>
+                <div v-else class="btn-spinner"></div>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="cancelDelete">
+      <div class="modal-content delete-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Confirmar Exclusão</h3>
+          <button class="btn-close" @click="cancelDelete">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="delete-confirmation">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Tem certeza que deseja excluir a notícia <strong>"{{ selectedNoticia?.titulo }}"</strong>?</p>
+            <p class="delete-warning">Esta ação não pode ser desfeita!</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" @click="cancelDelete">Cancelar</button>
+            <button 
+              class="btn-danger" 
+              @click="deleteNoticia"
+              :disabled="deleteSubmitting"
+            >
+              <span v-if="!deleteSubmitting">Confirmar Exclusão</span>
+              <div v-else class="btn-spinner"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  name: 'AdminNoticias',
+  data() {
+    return {
+      noticias: [],
+      categorias: [],
+      loading: false,
+      error: null,
+      searchQuery: '',
+      categoryFilter: 'all',
+      statusFilter: 'all',
+      showModal: false,
+      showDeleteModal: false,
+      isEditing: false,
+      selectedNoticia: null,
+      formSubmitting: false,
+      deleteSubmitting: false,
+      formError: null,
+      form: this.getEmptyForm()
+    };
+  },
+  computed: {
+    filteredNoticias() {
+      let result = [...this.noticias];
+      
+      // Search filter
+      if (this.searchQuery.trim() !== '') {
+        const query = this.searchQuery.toLowerCase();
+        result = result.filter(noticia => 
+          noticia.titulo.toLowerCase().includes(query) ||
+          noticia.conteudo.toLowerCase().includes(query) ||
+          noticia.autor.toLowerCase().includes(query)
+        );
+      }
+      
+      // Category filter
+      if (this.categoryFilter !== 'all') {
+        result = result.filter(noticia => 
+          noticia.categoria_id === this.categoryFilter
+        );
+      }
+      
+      // Status filter
+      if (this.statusFilter !== 'all') {
+        result = result.filter(noticia => 
+          noticia.status === this.statusFilter
+        );
+      }
+      
+      return result;
+    }
+  },
+  mounted() {
+    this.fetchNoticias();
+    this.fetchCategorias();
+  },
+  watch: {
+    saveNoticia(newValue, oldValue) {
+        this.fetchNoticias();
+    }
+  },
+  methods: {
+    getEmptyForm() {
+      return {
+        titulo: '',
+        conteudo: '',
+        autor: '',
+        categoria_id: '',
+        imagem: '',
+        criado_em: '',
+      };
+    },
+    async fetchNoticias() {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await axios.get('/Admin/Noticia');
+        this.noticias = response.data;
+      } catch (err) {
+        console.error('Erro ao buscar notícias:', err);
+        this.error = 'Não foi possível carregar as notícias. Tente novamente.';
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchCategorias() {
+      try {
+        const response = await axios.get('/Admin/Categoria');
+        this.categorias = response.data;
+      } catch (err) {
+        console.error('Erro ao buscar categorias:', err);
+      }
+    },
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateString).toLocaleDateString('pt-BR', options);
+    },
+    getStatusText(status) {
+      switch(status) {
+        case 'published': return 'Publicada';
+        case 'draft': return 'Rascunho';
+        default: return status;
+      }
+    },
+    getCategoryName(categoryId) {
+      const category = this.categorias.find(c => c.id === categoryId);
+      return category ? category.nome : 'Categoria não encontrada';
+    },
+    showAddModal() {
+      this.isEditing = false;
+      this.form = this.getEmptyForm();
+      this.showModal = true;
+      this.formError = null;
+    },
+    editNoticia(noticia) {
+      this.isEditing = true;
+      this.selectedNoticia = noticia;
+      
+      // Convert tags array to comma-separated string if needed
+      const tags = Array.isArray(noticia.tags) 
+        ? noticia.tags.join(', ')
+        : noticia.tags || '';
+      
+      this.form = {
+        id: noticia.id,
+        titulo: noticia.titulo,
+        conteudo: noticia.conteudo,
+        autor: noticia.autor,
+        categoria_id: noticia.categoria_id,
+        imagem: noticia.imagem || '',
+        criado_em: noticia.criado_em || '',
+      };
+      
+      this.showModal = true;
+      this.formError = null;
+    },
+    closeModal() {
+      this.showModal = false;
+      this.form = this.getEmptyForm();
+      this.formError = null;
+    },
+    async saveNoticia() {
+      this.formSubmitting = true;
+      this.formError = null;
+      
+      try {
+        const token = localStorage.getItem('adminToken');
+        const tokenType = localStorage.getItem('adminTokenType') || 'Bearer';
+        
+        // Convert tags string to array if needed by the API
+        const formData = {...this.form};
+        if (typeof formData.tags === 'string') {
+          formData.tags = formData.tags
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag);
+        }
+        
+        let response;
+        
+        if (this.isEditing) {
+          response = await axios.put(`/Admin/Noticia/${this.form.id}`, formData, {
+            headers: {
+              'Authorization': `${tokenType} ${token}`
+            }
+          });
+          
+
+        } else {
+          response = await axios.post('/Admin/Noticia', formData, {
+            headers: {
+              'Authorization': `${tokenType} ${token}`
+            }
+          });
+          
+          
+        }
+        
+        await this.fetchNoticias();
+
+        this.closeModal();
+      } catch (err) {
+        console.error('Erro ao salvar notícia:', err);
+        this.formError = 'Erro ao salvar notícia. Verifique os campos e tente novamente.';
+      } finally {
+        this.formSubmitting = false;
+      }
+    },
+    confirmDelete(noticia) {
+      this.selectedNoticia = noticia;
+      this.showDeleteModal = true;
+    },
+    cancelDelete() {
+      this.showDeleteModal = false;
+      this.selectedNoticia = null;
+    },
+    async deleteNoticia() {
+      this.deleteSubmitting = true;
+      
+      try {
+        const token = localStorage.getItem('adminToken');
+        const tokenType = localStorage.getItem('adminTokenType') || 'Bearer';
+        
+        await axios.delete(`/Admin/Noticia/${this.selectedNoticia.id}`, {
+          headers: {
+            'Authorization': `${tokenType} ${token}`
+          }
+        });
+        
+        // Remove from local state
+        this.noticias = this.noticias.filter(n => n.id !== this.selectedNoticia.id);
+        this.cancelDelete();
+      } catch (err) {
+        console.error('Erro ao excluir notícia:', err);
+        alert('Erro ao excluir notícia. Tente novamente.');
+      } finally {
+        this.deleteSubmitting = false;
+      }
+    },
+    searchNoticias() {
+      // This is handled by the computed property
+      // Just added for clarity of UX with the search button
+    }
+  }
+};
+</script>
+
+<style scoped>
+.admin-section {
+  padding: 0;
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.loading-state, .error-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.empty-state i, .error-state i {
+  font-size: 48px;
+  color: #9e9e9e;
+}
+
+.error-state i {
+  color: #f44336;
+}
+
+.empty-state p, .error-state p {
+  margin: 0;
+  color: #616161;
+  font-size: 16px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #4CAF50;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+
+.filters-container {  
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.search-box i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9e9e9e;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.filter-options {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item label {
+  font-size: 14px;
+  color: #616161;
+}
+
+.filter-select {
+  min-width: 150px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.noticia-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.noticia-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.noticia-card.featured::before {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255, 193, 7, 0.9);
+  color: #212121;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.card-image {
+  height: 180px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.card-image.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image.placeholder i {
+  font-size: 48px;
+  color: #bdbdbd;
+}
+
+.noticia-card:hover .card-image img {
+  transform: scale(1.05);
+}
+
+.card-content {
+  padding: 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-category {
+  background-color: #e0f2f1;
+  color: #00796b;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.card-title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #333;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #757575;
+  font-size: 13px;
+}
+
+.meta-item i {
+  width: 14px;
+  color: #9e9e9e;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.published {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-badge.draft {
+  background-color: #f5f5f5;
+  color: #616161;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #424242;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.content-editor {
+  font-family: inherit;
+  min-height: 250px;
+  resize: vertical;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-text {
+  color: #424242;
+}
+
+.form-error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.delete-confirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.delete-confirmation i {
+  font-size: 48px;
+  color: #f44336;
+}
+
+.delete-warning {
+  color: #f44336;
+  font-weight: 500;
+  margin: 8px 0 0 0;
+}
+
+.delete-modal {
+  max-width: 450px;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary, .btn-danger, .btn-retry {
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #388E3C;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background-color: #eeeeee;
+}
+
+.btn-danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #d32f2f;
+}
+
+.btn-retry {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-edit-small, .btn-delete-small, .btn-publish-small, .btn-unpublish-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-small {
+  background-color: #2196F3;
+  color: white;
+}
+
+.btn-edit-small:hover {
+  background-color: #1976D2;
+}
+
+.btn-publish-small {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-publish-small:hover {
+  background-color: #388E3C;
+}
+
+.btn-unpublish-small {
+  background-color: #FF9800;
+  color: white;
+}
+
+.btn-unpublish-small:hover {
+  background-color: #F57C00;
+}
+
+.btn-delete-small {
+  background-color: #F44336;
+  color: white;
+}
+
+.btn-delete-small:hover {
+  background-color: #D32F2F;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #616161;
+  cursor: pointer;
+}
+
+.btn-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid white;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.large-modal {
+  max-width: 800px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .filters-container {
+    flex-direction: column;
+  }
+  
+  .filter-options {
+    margin-top: 16px;
+  }
+}
+</style> 

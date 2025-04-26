@@ -1,34 +1,7 @@
 <template>
   <div class="landing-container">
     <!-- Navigation Bar -->
-    <header class="landing-header">
-      <div class="logo">
-        <h1>FinTrack</h1>
-      </div>
-      <nav class="nav-menu">
-        <ul>
-          <li><a href="#home" class="nav-link">Home</a></li>
-          <li><a href="#about" class="nav-link">Sobre</a></li>
-          <li><a href="#services" class="nav-link">Serviços</a></li>
-          <li><a href="#contact" class="nav-link">Contato</a></li>
-        </ul>
-      </nav>
-      <router-link to="/login" class="login-button">Entrar</router-link>
-      <div class="menu-toggle" @click="toggleMenu">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-      </div>
-    </header>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" :class="{ 'active': menuActive }">
-      <a href="#home" class="mobile-link" @click="closeMenu">Home</a>
-      <a href="#about" class="mobile-link" @click="closeMenu">Sobre</a>
-      <a href="#services" class="mobile-link" @click="closeMenu">Serviços</a>
-      <a href="#contact" class="mobile-link" @click="closeMenu">Contato</a>
-      <router-link to="/login" class="mobile-link login" @click="closeMenu">Entrar</router-link>
-    </div>
+    <NavBarTwo />
 
     <!-- Hero Section with Slideshow -->
     <section id="home" class="hero-section">
@@ -182,38 +155,21 @@
     </section>
 
     <!-- Footer -->
-    <footer class="landing-footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-logo">
-            <h2>FinTrack</h2>
-            <p>Sua solução completa para gestão financeira</p>
-          </div>
-          <div class="footer-links">
-            <div class="footer-column">
-              <h3>Links rápidos</h3>
-              <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">Sobre</a></li>
-                <li><a href="#services">Serviços</a></li>
-                <li><a href="#contact">Contato</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>&copy; 2025 FinTrack. Todos os direitos reservados.</p>
-        </div>
-      </div>
-    </footer>
+    <Footer />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import NavBarTwo from './NavBarTwo.vue';
+import Footer from './Footer.vue';
 
 export default {
   name: 'LandingPage',
+  components: {
+    NavBarTwo,
+    Footer
+  },
   data() {
     return {
       formData: {
@@ -221,7 +177,6 @@ export default {
         email: '',
         menssagem: ''
       },
-      menuActive: false,
       currentSlide: 0,
       slides: [
         {
@@ -252,12 +207,6 @@ export default {
         console.error('Error sending email:', error);
         alert('Erro ao enviar mensagem. Por favor, tente novamente.');
       }
-    },
-    toggleMenu() {
-      this.menuActive = !this.menuActive;
-    },
-    closeMenu() {
-      this.menuActive = false;
     },
     nextSlide() {
       this.currentSlide = (this.currentSlide + 1) % this.slides.length;
@@ -325,134 +274,6 @@ export default {
   background-color: #4CAF50;
   margin: 0 auto;
   border-radius: 4px;
-}
-
-/* Header Styles */
-.landing-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 50px;
-  background-color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-.logo h1 {
-  font-size: 2rem;
-  color: #4CAF50;
-  margin: 0;
-}
-
-.nav-menu ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  color: #333;
-  text-decoration: none;
-  padding: 10px 15px;
-  margin: 0 5px;
-  font-weight: 500;
-  transition: all 0.3s;
-  position: relative;
-}
-
-.nav-link:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 5px;
-  left: 50%;
-  background-color: #4CAF50;
-  transform: translateX(-50%);
-  transition: width 0.3s;
-}
-
-.nav-link:hover:after {
-  width: 50%;
-}
-
-.login-button {
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
-  color: white;
-  border: none;
-  padding: 10px 25px;
-  border-radius: 25px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  text-decoration: none;
-}
-
-.login-button:hover {
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
-  transform: translateY(-2px);
-}
-
-.menu-toggle {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-}
-
-.bar {
-  width: 25px;
-  height: 3px;
-  background-color: #333;
-  margin: 3px 0;
-  transition: 0.4s;
-  border-radius: 3px;
-}
-
-/* Mobile Menu */
-.mobile-menu {
-  display: none;
-  position: fixed;
-  top: 30px;
-  left: 0;
-  right: 0;
-  background: white;
-  padding: 80px 0 20px;
-  z-index: 999;
-  flex-direction: column;
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.mobile-menu.active {
-  transform: translateY(0);
-}
-
-.mobile-link {
-  color: #333;
-  text-decoration: none;
-  padding: 15px 20px;
-  text-align: center;
-  font-weight: 500;
-  border-bottom: 1px solid #f1f1f1;
-  transition: background-color 0.3s;
-}
-
-.mobile-link:hover {
-  background-color: #f9f9f9;
-}
-
-.mobile-link.login {
-  background-color: #4CAF50;
-  color: white;
-  margin: 15px 20px;
-  border-radius: 25px;
-  border: none;
 }
 
 /* Slideshow Styles */
@@ -858,119 +679,16 @@ export default {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Footer */
-.landing-footer {
-  background-color: #333;
-  color: white;
-  padding: 70px 0 20px;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 50px;
-}
-
-.footer-logo h2 {
-  color: white;
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-}
-
-.footer-logo p {
-  color: #aaa;
-  max-width: 300px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 50px;
-}
-
-.footer-column h3 {
-  color: white;
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.footer-column h3:after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 30px;
-  height: 2px;
-  background-color: #4CAF50;
-}
-
-.footer-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-column ul li {
-  margin-bottom: 10px;
-}
-
-.footer-column ul li a {
-  color: #aaa;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-column ul li a:hover {
-  color: #4CAF50;
-}
-
-.footer-bottom {
-  text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid #444;
-  color: #888;
-}
-
 /* Responsive Styles */
 @media (max-width: 1024px) {
   .about-content,
   .contact-content {
     flex-direction: column;
   }
-  
-  .footer-content {
-    flex-direction: column;
-    gap: 40px;
-  }
-  
-  .footer-links {
-    flex-wrap: wrap;
-    gap: 30px;
-  }
 }
 
 /* Responsive Fixes */
 @media (max-width: 768px) {
-  .landing-header {
-    padding: 15px 20px;
-  }
-  
-  .nav-menu {
-    display: none;
-  }
-  
-  .menu-toggle {
-    display: flex;
-  }
-  
-  .mobile-menu {
-    display: flex;
-  }
-  
-  .login-button {
-    display: none;
-  }
-  
   .section-header h2 {
     font-size: 1.8rem;
   }
