@@ -434,6 +434,7 @@ label {
 }
 
 .delete-confirmation {
+  color: #f44336;
   display: flex;
   flex-direction: column;
   align-items: center;
