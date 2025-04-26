@@ -220,16 +220,6 @@
             >
           </div>
           
-          <div class="form-group">
-            <label for="delete_password">Digite sua senha para confirmar:</label>
-            <input 
-              type="password" 
-              id="delete_password" 
-              v-model="deletePassword" 
-              class="form-input"
-              placeholder="Sua senha"
-            >
-          </div>
         </div>
         
         <div class="modal-footer">
