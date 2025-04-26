@@ -146,7 +146,6 @@
 
 <script>
 import NavBar from './NavBar.vue';
-import { TransactionService } from '../services/TransactionService';
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 export default {
