@@ -383,7 +383,14 @@ export default {
       formSubmitting: false,
       deleteSubmitting: false,
       formError: null,
-      form: this.getEmptyForm(),
+      form: {
+        titulo: '',
+        conteudo: '',
+        autor: '',
+        categoria_id: '',
+        imagem: null,
+        criado_em: '',
+      },
       
       // Image manager related data
       showImageModal: false,
@@ -549,15 +556,13 @@ export default {
         
         // Convert tags string to array if needed by the API
         const formData = {...this.form};
-        if (typeof formData.tags === 'string') {
-          formData.tags = formData.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag);
+
+        if(formData.imagem === "") {
+          formData.imagem = null;
         }
-        
+
         let response;
-        
+
         if (this.isEditing) {
           response = await axios.put(`/Admin/Noticia/${this.form.id}`, formData, {
             headers: {
@@ -580,8 +585,13 @@ export default {
 
         this.closeModal();
       } catch (err) {
-        console.error('Erro ao salvar notícia:', err);
-        this.formError = 'Erro ao salvar notícia. Verifique os campos e tente novamente.';
+        if (err.response.status === 404){
+          this.formError = 'Imagem não encontrada. Tente novamente.';
+        }
+        if(err.response.status != 404){
+          this.formError = 'Erro ao salvar notícia. Tente novamente.';
+          console.error('Erro ao salvar notícia:', err);
+        }
       } finally {
         this.formSubmitting = false;
       }
