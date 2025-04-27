@@ -71,7 +71,7 @@
         <div class="modal-content" @click.stop>
           <button class="close-modal" @click="closeModal">&times;</button>
           <div class="modal-image">
-            <img :src="selectedNoticia.imagem_url || getPlaceholderImage(selectedNoticia.id)" alt="Imagem da notícia">
+            <img :src="selectedNoticia.imagemUrl || getPlaceholderImage(selectedNoticia.id)" alt="Imagem da notícia">
             <div class="categoria-badge">{{ getCategoriaName(selectedNoticia.categoria_id) }}</div>
           </div>
           <div class="modal-body">
