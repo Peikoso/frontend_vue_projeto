@@ -229,7 +229,6 @@
             @click="deleteAccount" 
             :disabled="
               deleteConfirmation !== 'excluir minha conta' || 
-              !deletePassword || 
               deleting
             "
           >
@@ -398,7 +397,7 @@ export default {
     },
 
     async deleteAccount() {
-      if (this.deleteConfirmation !== 'excluir minha conta' || !this.deletePassword) {
+      if (this.deleteConfirmation !== 'excluir minha conta') {
         return;
       }
 

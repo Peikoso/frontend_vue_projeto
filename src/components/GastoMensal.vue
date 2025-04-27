@@ -21,7 +21,7 @@
           <div class="filter-group">
             <label for="year">Ano:</label>
             <select id="year" v-model="selectedYear" class="filter-input">
-              <option v-for="year in years" :key="year" :value="year">
+              <option v-for="year in availableYears" :key="year" :value="year">
                 {{ year }}
               </option>
             </select>
@@ -128,7 +128,6 @@ export default {
         'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
       ],
-      years: [],
       
       // Category mapping
       categoryMapping: {
@@ -152,17 +151,12 @@ export default {
         'educacao': 'rgba(255, 159, 64, 0.8)',
         'investimentos': 'rgba(40, 167, 69, 0.8)',
         'outros': 'rgba(108, 117, 125, 0.8)'
-      }
+      },
+      availableYears: [],
     };
   },
   mounted() {
-    // Setup years for filter
-    const currentYear = new Date().getFullYear();
-    for (let i = currentYear; i <= currentYear + 1; i++) {
-      this.years.push(i);
-    }
-    
-    // Fetch initial data
+    this.fetchYears();
     this.fetchData();
   },
   watch: {
@@ -178,6 +172,34 @@ export default {
     },
   },
   methods: {
+
+    async fetchYears() {
+      try {
+        const response = await axios.get('/Movimentacao/');
+        this.movimentacoes = response.data; 
+
+        const responseTwo = await axios.get('/OrcamentoMensal/All');
+        this.orcamentoAll = responseTwo.data;
+
+        const currentYear = new Date().getFullYear();
+
+        const movimentacaoDespesasAnos = this.movimentacoes
+        .filter(mov => mov.tipo_mov === 'despesa') 
+        .map(mov => mov.ano);      
+        
+        const orcamentoAnos = this.orcamentoAll.map(orc => orc.ano);
+
+        const yearsSet  = new Set([
+          currentYear,
+          ...movimentacaoDespesasAnos,
+          ...orcamentoAnos
+        ]);
+
+        this.availableYears = [...yearsSet].sort();
+      } catch (error) {
+        console.error('Error fetching years', error);
+      }
+    },
 
     async GastoMensal(mes, ano) {
       try {
