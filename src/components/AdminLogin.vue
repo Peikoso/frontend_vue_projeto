@@ -115,6 +115,12 @@ export default {
           }
         });
         
+        // If login is for admin, delete the user token
+        console.log('Usuário logado como admin, token de usuário removido');
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('tokenType')
+        localStorage.removeItem('userInfo')
+
         // Save token to localStorage
         localStorage.setItem('adminToken', response.data.access_token);
         localStorage.setItem('adminTokenType', response.data.token_type);
@@ -122,6 +128,7 @@ export default {
           username: this.form.username,
           is_admin: true
         }));
+
         
         // Redirect to admin dashboard
         this.$router.push('/admin');

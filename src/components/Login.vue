@@ -116,6 +116,11 @@ export default {
       .then(response => {
         console.log('Login successful:', response.data);
         
+        console.log('Usuário logado, token de admin removido');
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminTokenType')
+        localStorage.removeItem('adminInfo')
+
         // Store the token and user info in localStorage
         localStorage.setItem('accessToken', response.data.access_token);
         localStorage.setItem('tokenType', response.data.token_type);

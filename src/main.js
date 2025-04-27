@@ -19,7 +19,6 @@ import GastoMensal from './components/GastoMensal.vue'
 import Noticias from './components/Noticias.vue'
 import Admin from './components/Admin.vue'
 import AdminLogin from './components/AdminLogin.vue'
-import AdminNoticias from './components/AdminNoticias.vue'
 
 // Configure Axios
 axios.defaults.baseURL = import.meta.env.VITE_API_URL
@@ -87,8 +86,7 @@ const routes = [
   { path: '/register', component: Register },
   
   { path: '/admin', component: Admin },
-  { path: '/admin/login', component: AdminLogin },
-  { path: '/admin/noticias', component: AdminNoticias },
+  { path: '/admin/login', component: AdminLogin }
 ]
 
 const router = createRouter({
