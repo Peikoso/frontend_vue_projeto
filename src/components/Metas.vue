@@ -356,7 +356,19 @@ export default {
     async saveMeta() {
       this.isLoading = true;
       
-      // Validate that valor_reservado doesn't exceed valor
+      if(parseFloat(this.formData.valor_reservado) < 0){
+        alert('O valor reservado não pode ser menor que 0.');
+        this.isLoading = false;
+        return;
+      }
+
+      if(parseFloat(this.formData.valor) <= 0){
+        alert('O valor total da meta não pode ser menor ou igual a 0.');
+        this.isLoading = false;
+        return;
+      }
+
+
       if (parseFloat(this.formData.valor_reservado) > parseFloat(this.formData.valor)) {
         alert('O valor reservado não pode ser maior que o valor total da meta.');
         this.isLoading = false;
@@ -365,6 +377,12 @@ export default {
       
       if(this.formData.data_inicio > this.formData.data_fim){
         alert('A data de início não pode ser maior que a data de fim.');
+        this.isLoading = false;
+        return;
+      }
+
+      if(this.formData.descricao.length < 3) {
+        alert('A descrição deve conter pelo menos 3 caracteres.');
         this.isLoading = false;
         return;
       }

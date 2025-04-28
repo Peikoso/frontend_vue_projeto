@@ -267,6 +267,17 @@ export default {
     
     async saveBem() {
       try {
+
+        if(this.formData.nome.length < 3) {
+          alert('O nome do bem deve conter pelo menos 3 caracteres.');
+          return;
+        }
+
+        if(parseFloat(this.formData.valor) <= 0) {  
+          alert('O valor do bem não pode ser menor ou igual a 0.');
+          return;
+        }
+
         if (this.isEditing) {
           // Update existing bem
           await axios.put(`/Patrimonio/${this.currentBemId}`, this.formData);

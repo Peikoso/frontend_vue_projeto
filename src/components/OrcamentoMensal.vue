@@ -307,6 +307,11 @@ export default {
         return;
       }
       
+      if(parseFloat(this.formData.valor_previsto) <= 0) {
+        alert('O valor do orçamento não pode ser menor ou igual a 0.');
+        return;
+      }
+
       this.isLoading = true;
       
       try {
