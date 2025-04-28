@@ -226,7 +226,7 @@ export default {
           if (error.response && error.response.status === 409) {
             this.error = 'Já existe um usuário com este login ou email.';
           }
-          if(error.response && error.response.status === 422) {
+          else if (error.response && error.response.status === 422) {
             this.error = 'Dados inválidos. Por favor, tente novamente.';
           }
           else {

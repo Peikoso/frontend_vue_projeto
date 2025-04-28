@@ -552,16 +552,19 @@ export default {
 
       if(this.form.titulo.length < 3) {
         this.formError = 'O título deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
 
       if(this.form.conteudo.length < 3) {
         this.formError = 'O conteúdo deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
 
       if(this.form.autor.length < 3) {
         this.formError = 'O autor deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
       
@@ -604,12 +607,15 @@ export default {
         if (err.response.status === 404){
           this.formError = 'Imagem não encontrada. Tente novamente.';
         }
-        if(err.response.status != 404){
+        else if(err.response.status != 404){
           this.formError = 'Erro ao salvar notícia. Tente novamente.';
           console.error('Erro ao salvar notícia:', err);
         }
-        if(err.response.status === 422){
+        else if(err.response.status === 422){
           this.formError = 'Dados inválidos. Por favor, tente novamente.';
+        }
+        else{
+          this.formError = 'Erro ao salvar notícia. Tente novamente.';
         }
       } finally {
         this.formSubmitting = false;

@@ -332,7 +332,7 @@ export default {
         
         if (error.response && error.response.status === 409) {
           // Handle validation errors from API
-          alert('Erro de validação: Verifique se já existe um orçamento para esta categoria no mês/ano selecionado.');
+          alert('Verifique se já existe um orçamento para esta categoria no mês/ano selecionado.');
         } else {
           alert('Erro ao salvar orçamento. Por favor, tente novamente.');
         }

@@ -281,11 +281,13 @@ export default {
 
       if(this.form.admin_login.length < 3) {
         this.formError = 'O nome de usuário deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
       
       if(this.form.senha.length < 3) {
         this.formError = 'A senha deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
       

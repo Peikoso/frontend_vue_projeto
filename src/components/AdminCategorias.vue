@@ -201,6 +201,7 @@ export default {
 
       if(this.formData.nome.length < 3) {
         this.formError = 'O nome da categoria deve conter pelo menos 3 caracteres.';
+        this.formSubmitting = false;
         return;
       }
       
@@ -229,13 +230,13 @@ export default {
         if(err.response && err.response.status === 422){
           this.formError = 'Dados inválidos. Por favor, tente novamente.';
         }
-        if(err.response && err.response.status === 409){
+        else if(err.response && err.response.status === 409){
           this.formError = 'Já existe uma categoria com este nome.';
         }
-        if(err.response && err.response.status === 401){
+        else if(err.response && err.response.status === 401){
           this.formError = 'Não autorizado. Faça login novamente.';
         }
-        if(err.response && err.response.status === 400){
+        else if(err.response && err.response.status === 400){
           this.formError = 'Erro ao salvar. Tente novamente.';
         }
         else{
