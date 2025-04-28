@@ -381,7 +381,7 @@ export default {
         return;
       }
 
-      if(this.formData.descricao.length < 3) {
+      if(this.formData.descri.length < 3) {
         alert('A descrição deve conter pelo menos 3 caracteres.');
         this.isLoading = false;
         return;

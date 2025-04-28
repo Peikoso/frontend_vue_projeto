@@ -549,6 +549,22 @@ export default {
     async saveNoticia() {
       this.formSubmitting = true;
       this.formError = null;
+
+      if(this.form.titulo.length < 3) {
+        this.formError = 'O título deve conter pelo menos 3 caracteres.';
+        return;
+      }
+
+      if(this.form.conteudo.length < 3) {
+        this.formError = 'O conteúdo deve conter pelo menos 3 caracteres.';
+        return;
+      }
+
+      if(this.form.autor.length < 3) {
+        this.formError = 'O autor deve conter pelo menos 3 caracteres.';
+        return;
+      }
+      
       
       try {
         const token = localStorage.getItem('adminToken');
@@ -591,6 +607,9 @@ export default {
         if(err.response.status != 404){
           this.formError = 'Erro ao salvar notícia. Tente novamente.';
           console.error('Erro ao salvar notícia:', err);
+        }
+        if(err.response.status === 422){
+          this.formError = 'Dados inválidos. Por favor, tente novamente.';
         }
       } finally {
         this.formSubmitting = false;

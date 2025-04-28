@@ -198,6 +198,11 @@ export default {
     async saveCategoria() {
       this.formError = null;
       this.formSubmitting = true;
+
+      if(this.formData.nome.length < 3) {
+        this.formError = 'O nome da categoria deve conter pelo menos 3 caracteres.';
+        return;
+      }
       
       try {
         const token = localStorage.getItem('adminToken');
@@ -221,11 +226,19 @@ export default {
       } catch (err) {
         console.error('Erro ao salvar categoria:', err);
         
-        if (err.response && err.response.status === 422) {
-          this.formError = 'Dados inválidos. Verifique os campos e tente novamente.';
-        } else if (err.response && err.response.status === 401) {
+        if(err.response && err.response.status === 422){
+          this.formError = 'Dados inválidos. Por favor, tente novamente.';
+        }
+        if(err.response && err.response.status === 409){
+          this.formError = 'Já existe uma categoria com este nome.';
+        }
+        if(err.response && err.response.status === 401){
           this.formError = 'Não autorizado. Faça login novamente.';
-        } else {
+        }
+        if(err.response && err.response.status === 400){
+          this.formError = 'Erro ao salvar. Tente novamente.';
+        }
+        else{
           this.formError = 'Erro ao salvar. Tente novamente.';
         }
       } finally {

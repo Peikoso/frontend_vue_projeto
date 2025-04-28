@@ -323,12 +323,21 @@ export default {
       return re.test(email);
     },
 
+    validateLogin(login) {
+      const re = /^\d/;
+      return re.test(login);
+    },
+
+    validateName(name) {
+      const re = /^[A-Za-zÀ-ÿ\s]+$/;
+      return re.test(name);
+    },
+
     async updateProfile() {
       // Reset error messages
       this.emailError = '';
       this.passwordError = '';
       
-      // Validate email
       if (!this.form.email) {
         this.emailError = 'O email é obrigatório';
         return;
@@ -338,6 +347,27 @@ export default {
         this.emailError = 'Por favor, forneça um email válido';
         return;
       }
+
+      if(this.form.login.length < 3) {
+        this.error = 'O login deve conter pelo menos 3 caracteres.';
+        return;
+      }
+
+      if(!this.validateLogin(this.form.login)) {
+        this.error = 'Login inválido! Não pode começar com um número.';
+        return;
+      }
+
+      if(this.form.nome.length < 3) {
+        this.error = 'O nome deve conter pelo menos 3 caracteres.';
+        return;
+      }
+
+      if(!this.validateName(this.form.nome)) {  
+        this.error = 'O nome deve conter apenas letras.';
+        return;
+      }
+      
       
       // Validate password if the user is trying to change it
       if (this.form.new_password) {
@@ -382,13 +412,13 @@ export default {
       } catch (error) {
         console.error('Error updating profile:', error);
         
-        if (error.response && error.response.data && error.response.data.detail) {
-          if (error.response.data.detail.includes('password')) {
-            this.passwordError = error.response.data.detail;
-          } else {
-            alert(`Erro: ${error.response.data.detail}`);
-          }
-        } else {
+        if (error.response && error.response.status === 409) {
+          alert('Já existe um usuário com este login ou email.');
+        }
+        if(error.response && error.response.status === 422) {
+          alert('Dados inválidos. Por favor, tente novamente.');
+        }
+        else {
           alert('Ocorreu um erro ao atualizar seu perfil. Por favor, tente novamente.');
         }
       } finally {

@@ -278,6 +278,16 @@ export default {
     async saveAdmin() {
       this.formSubmitting = true;
       this.formError = null;
+
+      if(this.form.admin_login.length < 3) {
+        this.formError = 'O nome de usuário deve conter pelo menos 3 caracteres.';
+        return;
+      }
+      
+      if(this.form.senha.length < 3) {
+        this.formError = 'A senha deve conter pelo menos 3 caracteres.';
+        return;
+      }
       
       try {
         const token = localStorage.getItem('adminToken');

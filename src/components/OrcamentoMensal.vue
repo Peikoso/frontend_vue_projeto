@@ -330,7 +330,7 @@ export default {
       } catch (error) {
         console.error('Error saving orcamento:', error);
         
-        if (error.response && error.response.status === 400) {
+        if (error.response && error.response.status === 409) {
           // Handle validation errors from API
           alert('Erro de validação: Verifique se já existe um orçamento para esta categoria no mês/ano selecionado.');
         } else {

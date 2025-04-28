@@ -150,6 +150,25 @@ export default {
         this.error = 'As senhas não coincidem.';
         return false;
       }
+      if(this.formData.login.length < 3) {
+        this.error = 'O login deve conter pelo menos 3 caracteres.';
+        return false;
+      }
+
+      if(this.formData.nome.length < 3) {
+        this.error = 'O nome deve conter pelo menos 3 caracteres.';
+        return false;
+      }
+
+      if(!this.validateName(this.formData.nome)) {
+        this.error = 'O nome deve conter apenas letras.';
+        return false;
+      }
+
+      if(!this.validateLogin(this.formData.login)) {
+        this.error = 'Login inválido! Não pode começar com um número.';
+        return false;
+      }
       
       return true;
     },
@@ -157,6 +176,16 @@ export default {
     validateEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return re.test(email);
+    },
+    
+    validateName(name) {
+      const re = /^[A-Za-zÀ-ÿ\s]+$/;
+      return re.test(name);
+    },
+
+    validateLogin(login) {
+      const re = /^\d/;
+      return re.test(login);
     },
     
     handleRegister() {
@@ -194,19 +223,16 @@ export default {
         .catch(error => {
           console.error('Registration failed:', error);
           
-          if (error.response) {
-            console.error('Error response:', {
-              data: error.response.data,
-              status: error.response.status
-            });
-            this.error = error.response.data.detail || 'Erro ao realizar cadastro. Por favor, tente novamente.';
-          } else if (error.request) {
-            console.error('Error request:', error.request);
-            this.error = 'Sem resposta do servidor. Verifique sua conexão.';
-          } else {
-            console.error('Error message:', error.message);
-            this.error = 'Erro de rede. Verifique sua conexão.';
+          if (error.response && error.response.status === 409) {
+            this.error = 'Já existe um usuário com este login ou email.';
           }
+          if(error.response && error.response.status === 422) {
+            this.error = 'Dados inválidos. Por favor, tente novamente.';
+          }
+          else {
+            this.error = 'Erro ao realizar cadastro. Por favor, tente novamente.';
+          }
+
         })
         .finally(() => {
           this.isLoading = false;
