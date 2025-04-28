@@ -165,7 +165,7 @@ export default {
         return false;
       }
 
-      if(!this.validateLogin(this.formData.login)) {
+      if(this.validateLogin(this.formData.login)) {
         this.error = 'Login inválido! Não pode começar com um número.';
         return false;
       }

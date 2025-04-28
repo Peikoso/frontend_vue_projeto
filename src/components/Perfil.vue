@@ -353,7 +353,7 @@ export default {
         return;
       }
 
-      if(!this.validateLogin(this.form.login)) {
+      if(this.validateLogin(this.form.login)) {
         this.error = 'Login inválido! Não pode começar com um número.';
         return;
       }
