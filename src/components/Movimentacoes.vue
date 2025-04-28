@@ -428,7 +428,7 @@ export default {
       try {
         const response = await axios.get('/Movimentacao/');
         this.movimentacoes = response.data;
-        this.availableYears = [...new Set(this.movimentacoes.map(mov => mov.ano))].sort();
+        this.availableYears = [...new Set([new Date().getFullYear(), ...this.movimentacoes.map(mov => mov.ano)])].sort();
         console.log(this.movimentacoes)
       } catch (error) {
         console.error('Error fetching movimentacoes:', error);
