@@ -370,11 +370,6 @@ export default {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Generate background colors based on whether spending exceeds budget
-      const bgColorsForDifference = differences.map(diff => 
-        diff > 0 ? 'rgba(220, 53, 69, 0.7)' : 'rgba(40, 167, 69, 0.7)'
-      );
-
       this.barChart = new Chart(ctx, {
         type: 'bar',
         data: {
