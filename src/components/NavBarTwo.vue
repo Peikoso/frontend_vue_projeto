@@ -89,7 +89,7 @@ export default {
   z-index: 1000;
   transition: all 0.3s ease;
   padding: 15px 0;
-  background-color: transparent;
+  background-color: white;
 }
 
 .navbar-two.scrolled {
@@ -204,7 +204,7 @@ export default {
 .bar {
   width: 25px;
   height: 3px;
-  background-color: white;
+  background-color: #333;
   margin: 3px 0;
   transition: 0.4s;
   border-radius: 3px;

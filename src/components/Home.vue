@@ -226,10 +226,10 @@ export default {
       if (this.resumoFinanceiroAtual.saldo > 500) {
         return 'Boa';
       }
-      if (this.resumoFinanceiroAtual.saldo > 0) {
+      if (this.resumoFinanceiroAtual.saldo >= 0) {
         return 'Regular';
       }
-      if (this.resumoFinanceiroAtual.saldo <= 0) {
+      if (this.resumoFinanceiroAtual.saldo < 0) {
         return 'Crítico';
       } 
     },
@@ -238,10 +238,10 @@ export default {
       if (this.resumoFinanceiroAtual.saldo > 500) {
         return 'financial-status-boa';
       }
-      if (this.resumoFinanceiroAtual.saldo > 0) {
+      if (this.resumoFinanceiroAtual.saldo >= 0) {
         return 'financial-status-regular';  
       }
-      if (this.resumoFinanceiroAtual.saldo <= 0) {
+      if (this.resumoFinanceiroAtual.saldo < 0) {
         return 'financial-status-crítico';
       }
     },
@@ -250,10 +250,10 @@ export default {
       if (this.resumoFinanceiroAtual.saldo > 500) {
         return 'status-boa';
       }
-      if (this.resumoFinanceiroAtual.saldo > 0) {
+      if (this.resumoFinanceiroAtual.saldo >= 0) {
         return 'status-regular';
       }
-      if (this.resumoFinanceiroAtual.saldo <= 0) {
+      if (this.resumoFinanceiroAtual.saldo < 0) {
         return 'status-crítico';
       }
     },

@@ -9,16 +9,6 @@
         <h2 class="form-title">Crie sua conta</h2>
         <p class="form-subtitle">Preencha o formulário abaixo para se cadastrar</p>
         
-        <div v-if="error" class="error-message">
-          <div class="error-icon">⚠️</div>
-          <p>{{ error }}</p>
-        </div>
-        
-        <div v-if="success" class="success-message">
-          <div class="success-icon">✅</div>
-          <p>{{ success }}</p>
-        </div>
-        
         <div class="form-group">
           <label for="nome">Nome</label>
           <div class="input-wrapper">
@@ -88,6 +78,17 @@
             >
           </div>
         </div>
+
+        <div v-if="error" class="error-message">
+          <div class="error-icon">⚠️</div>
+          <p>{{ error }}</p>
+        </div>
+        
+        <div v-if="success" class="success-message">
+          <div class="success-icon">✅</div>
+          <p>{{ success }}</p>
+        </div>
+        
         
         <button 
           @click="handleRegister" 
@@ -217,7 +218,7 @@ export default {
           
           // Redirect to login page after a short delay
           setTimeout(() => {
-            this.$router.push('/');
+            this.$router.push('/login');
           }, 2000);
         })
         .catch(error => {

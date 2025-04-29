@@ -3,14 +3,14 @@
     <NavBar />
     <div class="goals-container">
         <div class="page-header">
-        <h1>Orçamento Mensal</h1>
+        <h1>Planejamento Mensal</h1>
         <p>Defina e acompanhe seus limites de gastos por categoria</p>
         </div>
         
         <!-- Loading Spinner -->
         <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
-        <p>Carregando orçamentos...</p>
+        <p>Carregando Planejamento...</p>
         </div>
         
         <!-- Error Message -->
@@ -22,7 +22,7 @@
         <div v-else>
         <!-- Filter Section -->
         <div class="filter-section">
-            <h3>Filtrar Orçamentos</h3>
+            <h3>Filtrar Planejamento</h3>
             <div class="filter-controls">
             <div class="filter-group">
                 <label for="month">Mês</label>
@@ -52,7 +52,7 @@
         <div class="add-button-container">
             <button @click="showAddModal = true" class="add-button">
             <span class="plus-icon">+</span>
-            Adicionar Orçamento
+            Adicionar Planejamento
             </button>
         </div>
         
@@ -64,12 +64,12 @@
         <!-- Empty State -->
         <div v-if="orcamentos.length === 0" class="empty-state">
             <span class="empty-icon">📝</span>
-            <h2>Nenhum orçamento encontrado</h2>
+            <h2>Nenhum Planejamento encontrado</h2>
             <p>Comece a definir limites de gastos para suas categorias</p>
         </div>
         
 
-        <!-- Orçamentos Grid -->
+        <!-- Planejamento Grid -->
         <div v-else class="orcamentos-grid">
             <div v-for="orcamento in orcamentos" :key="orcamento.id_orcamento" class="orcamento-card" :class="getCardClass(orcamento.categoria)">
             <div class="orcamento-categoria">
@@ -98,7 +98,7 @@
         <div v-if="showAddModal || showEditModal" class="modal-overlay" @click="closeModal">
         <div class="modal-content" @click.stop>
             <div class="modal-header">
-            <h2>{{ showEditModal ? 'Editar' : 'Adicionar' }} Orçamento</h2>
+            <h2>{{ showEditModal ? 'Editar' : 'Adicionar' }} Planejamento</h2>
             <button @click="closeModal" class="close-button">×</button>
             </div>
             
@@ -181,7 +181,7 @@
             </div>
             
             <div class="modal-body">
-            <p class="warning-text">Tem certeza que deseja excluir o orçamento para a categoria <strong>{{ selectedOrcamento ? getCategoryName(selectedOrcamento.categoria) : '' }}</strong>?</p>
+            <p class="warning-text">Tem certeza que deseja excluir o planejamento para a categoria <strong>{{ selectedOrcamento ? getCategoryName(selectedOrcamento.categoria) : '' }}</strong>?</p>
             <p class="warning-text">Esta ação não pode ser desfeita.</p>
             </div>
             
@@ -275,7 +275,7 @@ export default {
         this.yearRange = [...new Set([new Date().getFullYear(), ...this.orcamentoAll.map(orcamento => orcamento.ano)])].sort();	
       } catch (error) {
         console.error('Error fetching orcamentos:', error);
-        this.error = 'Não foi possível carregar os orçamentos. Por favor, tente novamente.';
+        this.error = 'Não foi possível carregar os planejamentos. Por favor, tente novamente.';
       } finally {
         this.loading = false;
       }
@@ -295,7 +295,7 @@ export default {
         this.orcamentos = response.data;
       } catch (error) {
         console.error('Error fetching orcamentos:', error);
-        this.error = 'Não foi possível carregar os orçamentos. Por favor, tente novamente.';
+        this.error = 'Não foi possível carregar os planejamentos. Por favor, tente novamente.';
       } finally {
         this.loading = false;
       }
@@ -308,7 +308,7 @@ export default {
       }
       
       if(parseFloat(this.formData.valor_previsto) <= 0) {
-        alert('O valor do orçamento não pode ser menor ou igual a 0.');
+        alert('O valor do planejamento não pode ser menor ou igual a 0.');
         return;
       }
 
@@ -332,9 +332,9 @@ export default {
         
         if (error.response && error.response.status === 409) {
           // Handle validation errors from API
-          alert('Verifique se já existe um orçamento para esta categoria no mês/ano selecionado.');
+          alert('Verifique se já existe um planejamento para esta categoria no mês/ano selecionado.');
         } else {
-          alert('Erro ao salvar orçamento. Por favor, tente novamente.');
+          alert('Erro ao salvar planejamento. Por favor, tente novamente.');
         }
       } finally {
         this.isLoading = false;
@@ -355,7 +355,7 @@ export default {
         this.selectedOrcamento = null;
       } catch (error) {
         console.error('Error deleting orcamento:', error);
-        alert('Erro ao excluir orçamento. Por favor, tente novamente.');
+        alert('Erro ao excluir planejamento. Por favor, tente novamente.');
       } finally {
         this.isLoading = false;
       }

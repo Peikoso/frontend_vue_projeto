@@ -1,6 +1,8 @@
 <template>
   <div class="navbar">
-    <div class="brand">FinTrack</div>
+    <div class="brand">
+     <router-link to="/" class="nav-link landing-button">FinTrack</router-link>
+    </div>
     <div class="nav-links">
       <router-link to="/home" class="nav-link">HOME</router-link>
       <router-link to="/Movimentacoes" class="nav-link">MOVIMENTAÇÕES</router-link>
@@ -8,7 +10,6 @@
       <router-link to="/orcamento" class="nav-link">ORÇAMENTO</router-link>
       <router-link to="/metas" class="nav-link">METAS</router-link>
       <router-link to="/patrimonio" class="nav-link">PATRIMÔNIO</router-link>
-      <router-link to="/" class="nav-link landing-button">INÍCIO</router-link>
       <div class="user-menu">
         <div class="user-icon" @click="toggleUserMenu">
           👤
@@ -33,7 +34,6 @@
     <router-link to="/orcamento" class="mobile-link" @click="closeMenu">ORÇAMENTO</router-link>
     <router-link to="/metas" class="mobile-link" @click="closeMenu">METAS</router-link>
     <router-link to="/patrimonio" class="mobile-link" @click="closeMenu">PATRIMÔNIO</router-link>
-    <router-link to="/" class="mobile-link landing-link" @click="closeMenu">INÍCIO</router-link>
     <router-link to="/perfil" class="mobile-link" @click="closeMenu">
       <span>PERFIL</span> 👤
     </router-link>
@@ -279,7 +279,6 @@ export default {
 }
 
 .landing-button:before {
-  content: '🏠';
   margin-right: 5px;
   font-size: 14px;
 }
